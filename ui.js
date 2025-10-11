@@ -673,6 +673,12 @@ const Debug = {
   },
 
   render() {
+    this.renderGrid();
+    this.renderPointer();
+    this.renderLog();
+  },
+
+  renderLog() {
     let font = TextStyle.font;
     let padding = 5;
 
@@ -691,5 +697,37 @@ const Debug = {
     }
 
     TextStyle.restore();
+  },
+
+  renderGrid() {
+    ctx.save();
+    ctx.beginPath();
+    ctx.globalAlpha = 0.25;
+    ctx.strokeStyle = "blue";
+    ctx.translate(0.5, 0.5);
+    for (let y = UI.GRID.y0; y < UI.GRID.y1; y += gridToPixel(1)) {
+      ctx.moveTo(UI.GRID.x0, y);
+      ctx.lineTo(UI.GRID.x1, y);
+    }
+    for (let x = UI.GRID.x0; x < UI.GRID.x1; x += gridToPixel(1)) {
+      ctx.moveTo(x, UI.GRID.y0);
+      ctx.lineTo(x, UI.GRID.y1);
+    }
+    ctx.stroke();
+    ctx.restore();
+  },
+
+  renderPointer() {
+    ctx.save();
+    ctx.beginPath();
+    ctx.globalAlpha = 0.25;
+    ctx.strokeStyle = "white";
+    ctx.translate(0.5, 0.5);
+    ctx.moveTo(UI.GRID.x0, UI.pointer.y);
+    ctx.lineTo(UI.GRID.x1, UI.pointer.y);
+    ctx.moveTo(UI.pointer.x, UI.GRID.y0);
+    ctx.lineTo(UI.pointer.x, UI.GRID.y1);
+    ctx.stroke();
+    ctx.restore();
   },
 };

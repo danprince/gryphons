@@ -290,6 +290,22 @@ export class Rectangle {
       y: this.y + this.h / 2,
     };
   }
+
+  get x0() {
+    return this.x;
+  }
+
+  get y0() {
+    return this.y;
+  }
+
+  get x1() {
+    return this.x + this.w;
+  }
+
+  get y1() {
+    return this.y + this.h;
+  }
 }
 
 /**
