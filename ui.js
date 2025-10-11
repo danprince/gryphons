@@ -517,6 +517,7 @@ export class GameInfo {
     y += writeLine(this.name, bounds.center.x, y);
 
     TextStyle.align = "center";
+    TextStyle.color = Colors.eiffel;
     y += writeText(this.description, bounds.center.x, y, bounds.w);
 
     TextStyle.restore();
