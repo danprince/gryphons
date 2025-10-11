@@ -18,6 +18,7 @@ import {
 import {
   assert,
   clamp,
+  lerp,
   randomItem,
   Rectangle,
   removeFromArray,
@@ -243,6 +244,7 @@ export const UI = {
     this.needsRender ||= this.screenshakeTimer > 0;
     VFX.update(dt);
     Timer.update(dt);
+    Message.update(dt);
 
     if (this.screenshakeTimer > 0) {
       this.screenshakeTimer -= dt;
@@ -270,12 +272,99 @@ export const UI = {
 
     this.currentScreen?.render();
     VFX.render();
+    Message.render();
 
     if (shake) {
       ctx.restore();
     }
   },
 };
+
+export class Message {
+  /**
+   * @private
+   */
+  static global = new Message();
+
+  /**
+   * @param {string} text
+   */
+  static show(text) {
+    this.global.show(text);
+  }
+
+  /**
+   * @param {number} dt
+   */
+  static update(dt) {
+    this.global.update(dt);
+  }
+
+  static render() {
+    this.global.render();
+  }
+
+  timer = 0;
+  opacity = 1;
+  text = "";
+  bounds = new Rectangle();
+  visible = false;
+
+  /**
+   * @param {number} dt
+   */
+  update(dt) {
+    this.timer -= dt;
+
+    if (this.timer <= 0 && this.visible) {
+      this.hide();
+    }
+  }
+
+  /**
+   * @param {string} text
+   */
+  async show(text) {
+    this.text = text;
+    this.visible = true;
+    this.timer = 3000;
+    this.bounds.w = text.length * TextStyle.font.glyphWidth;
+    this.bounds.h = TextStyle.font.glyphHeight;
+    this.bounds.x = UI.HAND.center.x - this.bounds.w / 2;
+    this.bounds.y = UI.HAND.y + UI.HAND.h - this.bounds.h / 2;
+    this.bounds.grow(3);
+
+    let y0 = this.bounds.y + 10;
+    let y1 = this.bounds.y;
+
+    await Timer.promise(300, (t) => {
+      this.bounds.y = lerp(y0, y1, t);
+      this.opacity = lerp(0, 1, t * 2);
+    });
+  }
+
+  async hide() {
+    let y0 = this.bounds.y;
+    let y1 = this.bounds.y + 10;
+    this.visible = false;
+
+    await Timer.promise(300, (t) => {
+      this.bounds.y = lerp(y0, y1, t);
+      this.opacity = lerp(1, 0, t);
+    });
+  }
+
+  render() {
+    ctx.globalAlpha = this.opacity;
+    drawFrame(Sprites.panel, this.bounds);
+    TextStyle.save();
+    TextStyle.align = "center";
+    TextStyle.baseline = "middle";
+    writeLine(this.text, this.bounds.center.x, this.bounds.center.y);
+    TextStyle.restore();
+    ctx.globalAlpha = this.opacity;
+  }
+}
 
 export class Screen {
   /**

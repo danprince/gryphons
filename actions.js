@@ -2,7 +2,7 @@
 
 import { gridToPixel, Timer } from "./engine.js";
 import { Action, Card, Tile } from "./game.js";
-import { UI, VFX } from "./ui.js";
+import { Message, UI, VFX } from "./ui.js";
 import { required, lerp, easeInOut } from "./utils.js";
 
 export class DrawCardsUntilHandIsFull extends Action {
@@ -12,7 +12,7 @@ export class DrawCardsUntilHandIsFull extends Action {
     if (board.isHandFull()) {
       return Action.done;
     } else if (board.discardPile.isEmpty() && board.drawPile.isEmpty()) {
-      // TODO: Show a message
+      Message.show("You don't have any cards left!");
       return Action.done;
     } else {
       board.addActionsTop(new DrawCard());
@@ -26,12 +26,12 @@ export class DrawCard extends Action {
     let { board } = this.game;
 
     if (board.isHandFull()) {
-      // TODO: Show a message
+      Message.show("Your hand is full!");
       return Action.done;
     }
 
     if (board.discardPile.isEmpty() && board.drawPile.isEmpty()) {
-      // TODO: Show a message
+      Message.show("You don't have any cards left!");
       return Action.done;
     }
 
