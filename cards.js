@@ -5,8 +5,8 @@ import {
   PlayCard,
   Damage,
   ReturnCardToDrawPile,
-  MoveToGravePile,
   CreateCardInHand,
+  DestroyCard,
 } from "./actions.js";
 import { Card, CardCategory, CardEffect, CardType } from "./game.js";
 import * as Sprites from "./sprites.js";
@@ -261,7 +261,7 @@ export const Lich = new CardType({
 
       game.board.addActionsBottom(
         new CreateCardInHand(thrall, bone.tile),
-        new MoveToGravePile(bone),
+        new DestroyCard(bone),
       );
     }
   },

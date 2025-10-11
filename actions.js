@@ -253,6 +253,25 @@ export class MoveToGravePile extends Action {
   }
 }
 
+export class DestroyCard extends Action {
+  /**
+   * @param {Card} card
+   */
+  constructor(card) {
+    super();
+    this.card = card;
+  }
+
+  perform() {
+    // We don't actually know where the card is so just remove it from
+    // everywhere.
+    this.game.deck.remove(this.card);
+    this.game.board.removeCard(this.card);
+    this.game.board.removeCardFromHand(this.card);
+    return Action.done;
+  }
+}
+
 export class MoveCard extends Action {
   /**
    * @param {Card} card
