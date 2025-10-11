@@ -14,6 +14,7 @@ import {
   start,
   canvas,
   pixelToGrid,
+  screenToGrid,
 } from "./engine.js";
 import {
   assert,
@@ -25,10 +26,10 @@ import {
   splitSprite,
 } from "./utils.js";
 import * as Sprites from "./sprites.js";
+import { Card, Game } from "./game.js";
 
 /**
  * @import { Point } from "./utils.js";
- * @import { Card, Game } from "./game.js";
  * @import { Sprite, NineSliceSprite } from "./sprites.js";
  */
 
@@ -76,6 +77,11 @@ export const UI = {
    * Track whether the UI needs to refresh during the next frame.
    */
   needsRender: true,
+
+  /**
+   * Whether or not to show debug information.
+   */
+  debug: false,
 
   /**
    *
@@ -158,6 +164,18 @@ export const UI = {
       this.render();
     };
 
+    /**
+     *
+     * @param {KeyboardEvent} event
+     */
+    const handleKeyDownEvent = (event) => {
+      if (event.key === "D") {
+        this.debug = !this.debug;
+        this.needsRender = true;
+      }
+    };
+
+    addEventListener("keydown", handleKeyDownEvent);
     addEventListener("pointermove", handlePointerEvent);
     addEventListener("pointerdown", handlePointerEvent);
     addEventListener("pointerup", handlePointerEvent);
@@ -277,6 +295,54 @@ export const UI = {
     if (shake) {
       ctx.restore();
     }
+
+    if (this.debug) {
+      this.renderDebug();
+    }
+  },
+
+  renderDebug() {
+    let gridPos = screenToGrid(this.pointer);
+    let boardPos = UI.screenToBoard(this.pointer);
+    let tile = Game.current.board.getTileAt(boardPos.x, boardPos.y);
+    let board = Game.current.board;
+    let log = Debug.log;
+
+    Debug.clear();
+    log(Colors.eiffel, "DEBUG");
+    log();
+
+    log(Colors.turtle, "pointer");
+    log(Colors.white, `${this.pointer.x} ${this.pointer.y}`);
+    log();
+
+    log(Colors.turtle, "grid");
+    log(Colors.white, `${gridPos.x | 0} ${gridPos.y | 0}`);
+    log();
+
+    log(Colors.turtle, "board");
+    log(Colors.white, `${boardPos.x} ${boardPos.y}`);
+    log();
+
+    log(Colors.turtle, "hand");
+    for (let card of board.hand) {
+      if (card) {
+        log(Colors.white, `${card.type.name} (${card.counter})`);
+      } else {
+        log(Colors.eiffel, "---");
+      }
+    }
+    log();
+
+    log(Colors.turtle, "card");
+    if (tile?.card) {
+      let card = tile.card;
+      log(Colors.white, `${card.type.name} (${card.counter})`);
+    } else {
+      log(Colors.eiffel, "---");
+    }
+
+    Debug.render();
   },
 };
 
@@ -583,3 +649,46 @@ export class VFX {
     assert(this.sprites.length > 0);
   }
 }
+
+const Debug = {
+  bounds: UI.LEFT_PANEL.clone(),
+
+  /**
+   * @type {[color: string, text: string][]}
+   * @private
+   */
+  lines: [],
+
+  /**
+   * @param {string} color
+   * @param {string} text
+   */
+  log(color = Colors.white, text = "") {
+    Debug.lines.push([color, text]);
+  },
+
+  clear() {
+    this.lines = [];
+  },
+
+  render() {
+    let font = TextStyle.font;
+    let padding = 5;
+
+    drawFrame(Sprites.panel, this.bounds);
+
+    TextStyle.save();
+    TextStyle.align = "left";
+    TextStyle.baseline = "top";
+    let x = this.bounds.x + padding;
+    let y = this.bounds.y + padding;
+
+    for (let [color, text] of this.lines) {
+      TextStyle.color = color;
+      writeLine(text, x, y);
+      y += font.lineHeight;
+    }
+
+    TextStyle.restore();
+  },
+};
