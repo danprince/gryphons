@@ -1,0 +1,494 @@
+// @ts-check
+
+import {
+  ctx,
+  drawNineSlice,
+  drawSprite,
+  TextStyle,
+  Timer,
+  gridToPixel,
+  writeLine,
+  writeText,
+  clear,
+  resize,
+  start,
+  canvas,
+  pixelToGrid,
+} from "./engine.js";
+import {
+  assert,
+  clamp,
+  randomItem,
+  Rectangle,
+  removeFromArray,
+  splitSprite,
+} from "./utils.js";
+import * as Sprites from "./sprites.js";
+
+/**
+ * @import { Point } from "./utils.js";
+ * @import { Card, Game } from "./game.js";
+ * @import { Sprite, NineSliceSprite } from "./sprites.js";
+ */
+
+export const Colors = {
+  white: "#ffffff",
+  black: "#000000",
+  bone: "#e3d5c5",
+  turtle: "#504237",
+  waterfall: "#30be9f",
+  red: "#bf4848",
+  eiffel: "#9b8d7e",
+};
+
+/**
+ * Create a rectangle in pixel coordinates, given grid coordinates.
+ * @param {number} x
+ * @param {number} y
+ * @param {number} w
+ * @param {number} h
+ * @returns {Rectangle}
+ */
+function GRID_RECT(x, y, w, h) {
+  return new Rectangle(
+    gridToPixel(x),
+    gridToPixel(y),
+    gridToPixel(w),
+    gridToPixel(h),
+  );
+}
+
+export const UI = {
+  GRID: GRID_RECT(0, 0, 17, 11),
+  LEFT_PANEL: GRID_RECT(0, 1, 4, 8),
+  CENTER_PANEL: GRID_RECT(4, 1, 9, 9),
+  RIGHT_PANEL: GRID_RECT(13, 1, 4, 8),
+  LEFT_TRAY: GRID_RECT(0, 9, 4, 1),
+  RIGHT_TRAY: GRID_RECT(13, 9, 4, 1),
+  BOARD: GRID_RECT(5, 2, 7, 6),
+  HAND: GRID_RECT(6, 9, 5, 1),
+  DRAW_PILE: GRID_RECT(14, 9, 4, 1),
+  DISCARD_PILE: GRID_RECT(15, 9, 4, 1),
+  GRAVE_PILE: GRID_RECT(16, 9, 4, 1),
+
+  /**
+   * Track whether the UI needs to refresh during the next frame.
+   */
+  needsRender: true,
+
+  /**
+   *
+   */
+  pointer: {
+    x: 0,
+    y: 0,
+    buttons: 0,
+    prevButtons: 0,
+    isPressed() {
+      return this.buttons === 1 && this.prevButtons === 0;
+    },
+    isDown() {
+      return this.buttons === 1;
+    },
+  },
+
+  screenshakeTimer: 0,
+
+  /**
+   * @type {Screen | undefined}
+   */
+  currentScreen: undefined,
+
+  /**
+   * @type {boolean}
+   */
+  isNavigating: false,
+
+  /**
+   * @type {GameInfo | undefined}
+   */
+  currentGameInfo: undefined,
+
+  /**
+   * @type {GameInfo | undefined}
+   */
+  tempGameInfo: undefined,
+
+  /**
+   * @type {CardInfo | undefined}
+   */
+  cardInfo: undefined,
+
+  get activeGameInfo() {
+    return this.tempGameInfo ?? this.currentGameInfo;
+  },
+
+  /**
+   * @param {Screen} screen
+   */
+  init(screen) {
+    resize(UI.GRID.w, UI.GRID.h);
+    this.navigate(screen);
+    this.addEventListeners();
+    start((dt) => UI.update(dt));
+  },
+
+  addEventListeners() {
+    /**
+     * @param {PointerEvent} event
+     */
+    const handlePointerEvent = (event) => {
+      let bounds = canvas.getBoundingClientRect();
+      let scaleX = bounds.width / canvas.width;
+      let scaleY = bounds.height / canvas.height;
+      let canvasX = (event.clientX - bounds.x) / scaleX;
+      let canvasY = (event.clientY - bounds.y) / scaleY;
+      this.pointer.x = Math.floor(canvasX);
+      this.pointer.y = Math.floor(canvasY);
+      this.pointer.buttons = event.buttons;
+      this.needsRender = true;
+    };
+
+    /**
+     * @param {UIEvent} event
+     */
+    const handleResizeEvent = (event) => {
+      resize(canvas.width, canvas.height);
+      this.render();
+    };
+
+    addEventListener("pointermove", handlePointerEvent);
+    addEventListener("pointerdown", handlePointerEvent);
+    addEventListener("pointerup", handlePointerEvent);
+    addEventListener("resize", handleResizeEvent);
+  },
+
+  /**
+   * @param {number} duration
+   */
+  screenshake(duration = 100) {
+    this.screenshakeTimer = Math.max(duration, this.screenshakeTimer);
+  },
+
+  /**
+   * @param {Card} card
+   */
+  inspectCard(card) {
+    this.cardInfo = new CardInfo(card);
+  },
+
+  /**
+   * @param {GameInfo} info
+   */
+  showGameInfo(info) {
+    this.currentGameInfo = info;
+  },
+
+  /**
+   * @param {GameInfo} info
+   */
+  previewGameInfo(info) {
+    this.tempGameInfo = info;
+  },
+
+  /**
+   * @param {Point} pos
+   * @returns {Point}
+   */
+  screenToBoard(pos) {
+    return {
+      x: Math.floor(pixelToGrid(pos.x - this.BOARD.x)),
+      y: Math.floor(pixelToGrid(pos.y - this.BOARD.y)),
+    };
+  },
+
+  /**
+   * @param {Point} pos
+   * @returns {Point}
+   */
+  boardToScreen(pos) {
+    return {
+      x: this.BOARD.x + gridToPixel(pos.x),
+      y: this.BOARD.y + gridToPixel(pos.y),
+    };
+  },
+
+  /**
+   * Navigate to a new screen.
+   * @param {Screen} screen
+   */
+  async navigate(screen) {
+    if (this.isNavigating) return;
+
+    this.isNavigating = true;
+    let previousScreen = this.currentScreen;
+    let currentScreen = screen;
+    await previousScreen?.exit();
+    this.needsRender = true;
+    this.currentScreen = currentScreen;
+    this.isNavigating = false;
+    await currentScreen.enter();
+    this.needsRender = true;
+  },
+
+  /**
+   * @param {number} dt
+   */
+  update(dt) {
+    this.cardInfo = undefined;
+    this.tempGameInfo = undefined;
+    this.currentScreen?.update(dt);
+    this.needsRender ||= Timer.timers.length > 0;
+    this.needsRender ||= VFX.animations.length > 0;
+    this.needsRender ||= this.screenshakeTimer > 0;
+    VFX.update(dt);
+    Timer.update(dt);
+
+    if (this.screenshakeTimer > 0) {
+      this.screenshakeTimer -= dt;
+    }
+
+    if (this.needsRender) {
+      this.needsRender = false;
+      this.render();
+    }
+
+    this.pointer.prevButtons = this.pointer.buttons;
+  },
+
+  render() {
+    clear();
+
+    let shake = this.screenshakeTimer > 0;
+
+    if (shake) {
+      let x = randomItem([-1, 0, 1]);
+      let y = randomItem([-1, 0, 1]);
+      ctx.save();
+      ctx.translate(x, y);
+    }
+
+    this.currentScreen?.render();
+    VFX.render();
+
+    if (shake) {
+      ctx.restore();
+    }
+  },
+};
+
+export class Screen {
+  /**
+   * Called when the screen enters. If you return a promise then it should
+   * resolve when the screen finishes animating in.
+   * @return {void | Promise<void>}
+   */
+  enter() {}
+  /**
+   * Called when the screen exits. If you return a promise then it should
+   * resolve when the screen finishes animating out.
+   * @return {void | Promise<void>}
+   */
+  exit() {}
+  /**
+   * Called every frame.
+   * @param {number} dt The number of milliseconds since the last update.
+   */
+  update(dt) {}
+  /**
+   * Called whenever the screen needs to redraw.
+   */
+  render() {}
+}
+
+/**
+ * @typedef {object} Box
+ * @prop {Rectangle} bounds
+ */
+
+/**
+ * @param {Point} point
+ * @param {...Box} boxes
+ */
+export function alignToRow({ x, y }, ...boxes) {
+  for (let box of boxes) {
+    box.bounds.x = x;
+    box.bounds.y = y;
+    x += box.bounds.w;
+  }
+}
+
+/**
+ * @param {NineSliceSprite} sprite
+ * @param {Rectangle} rect
+ */
+export function drawFrame(sprite, rect) {
+  drawNineSlice(sprite, rect.x, rect.y, rect.w, rect.h);
+}
+
+export class GameInfo {
+  /**
+   * @param {object} config
+   * @param {string} config.name
+   * @param {string} config.description
+   * @param {Sprite} [config.bannerSprite]
+   * @param {NineSliceSprite} [config.panelSprite]
+   */
+  constructor(config) {
+    this.name = config.name;
+    this.description = config.description;
+    this.bannerSprite = config.bannerSprite;
+    this.panelSprite = config.panelSprite;
+  }
+
+  /**
+   * @param {Rectangle} bounds
+   */
+  render(bounds) {
+    let y = bounds.y;
+
+    if (this.panelSprite) {
+      drawFrame(this.panelSprite, bounds);
+    }
+
+    if (this.bannerSprite) {
+      drawSprite(this.bannerSprite, bounds.x, y);
+      y += this.bannerSprite.height;
+    }
+
+    TextStyle.save();
+
+    TextStyle.align = "center";
+    y += writeLine(this.name, bounds.center.x, y);
+
+    TextStyle.align = "center";
+    y += writeText(this.description, bounds.center.x, y, bounds.w);
+
+    TextStyle.restore();
+  }
+}
+
+export class CardInfo {
+  /**
+   * @param {Card} card
+   */
+  constructor(card) {
+    this.card = card;
+  }
+
+  /**
+   * @param {Rectangle} bounds
+   */
+  render(bounds) {
+    let { card } = this;
+    let { x, y, w } = bounds.clone().grow(-5);
+    let gap = 5;
+
+    drawSprite(Sprites.banner_monster, bounds.x, bounds.y);
+    y += gap;
+
+    let sprite = card.type.sprite;
+    drawSprite(sprite, bounds.center.x - sprite.width / 2, y);
+    y += sprite.height + gap;
+
+    TextStyle.save();
+    TextStyle.align = "center";
+    y += writeLine(card.type.name, bounds.center.x, y);
+    y += gap;
+    TextStyle.restore();
+
+    if (card.type.description) {
+      TextStyle.save();
+      TextStyle.align = "left";
+      TextStyle.color = Colors.eiffel;
+      y += writeText(card.type.description, x, y, w);
+      y += gap;
+      TextStyle.restore();
+    }
+
+    y += gap;
+
+    for (let effect of card.effects) {
+      drawSprite(effect.icon, x, y);
+      TextStyle.save();
+      TextStyle.align = "left";
+      TextStyle.color = Colors.white;
+      y += writeLine(effect.name, x + 10, y + 1) + 2;
+      TextStyle.color = Colors.eiffel;
+      y += writeText(effect.description, x + 10, y, w - 10);
+      y += gap;
+      TextStyle.restore();
+    }
+  }
+}
+
+/**
+ * @typedef {object} SpriteAnimation
+ * @prop {number} x
+ * @prop {number} y
+ * @prop {Sprite[]} sprites
+ * @prop {number} duration
+ * @prop {number} elapsed
+ * @prop {number} frame
+ */
+
+export class VFX {
+  static slash = new VFX(Sprites.vfx_slash);
+  static claw = new VFX(Sprites.vfx_claw);
+  static heal = new VFX(Sprites.vfx_heal);
+
+  /**
+   * @type {SpriteAnimation[]}
+   */
+  static animations = [];
+
+  /**
+   * @param {VFX} vfx
+   * @param {number} x
+   * @param {number} y
+   */
+  static play(vfx, x, y) {
+    this.animations.push({
+      x,
+      y,
+      frame: 0,
+      elapsed: 0,
+      sprites: vfx.sprites,
+      duration: vfx.duration,
+    });
+  }
+
+  /**
+   *
+   * @param {number} dt
+   */
+  static update(dt) {
+    for (let anim of this.animations) {
+      let progress = clamp(0, 1, anim.elapsed / anim.duration);
+
+      anim.elapsed += dt;
+      anim.frame = Math.floor(progress * (anim.sprites.length - 1));
+
+      if (anim.elapsed > anim.duration) {
+        removeFromArray(this.animations, anim);
+      }
+    }
+  }
+
+  static render() {
+    for (let anim of this.animations) {
+      let sprite = anim.sprites[anim.frame];
+      drawSprite(sprite, anim.x, anim.y);
+    }
+  }
+
+  /**
+   * @param {Sprite} sprite
+   * @param {number} [duration]
+   */
+  constructor(sprite, duration) {
+    this.sprites = splitSprite(sprite, sprite.height, sprite.height);
+    this.duration = duration || this.sprites.length * 100;
+    assert(this.sprites.length > 0);
+  }
+}
