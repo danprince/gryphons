@@ -87,11 +87,13 @@ export function resize(width, height) {
 
 /**
  * @typedef {object} SpriteFont
- * @prop {Sprite[]} sprites
- * @prop {number} glyphWidth
- * @prop {number} glyphHeight
- * @prop {number} lineHeight
- * @prop {number} charOffset
+ * @prop {Sprite[]} sprites Sprites representing the glyphs in this font.
+ * @prop {number} glyphWidth The width of each glyph in pixels.
+ * @prop {number} glyphHeight The height of each glyph in pixels.
+ * @prop {number} lineHeight The vertical distance to advance when writing lines of text.
+ * @prop {number} charOffset The char code of the first glyph in the font.
+ * @prop {number} fallbackCharCode The char code to render for glyphs outside the font.
+ * @prop {number} iconsCharCode The char code where icons start.
  *
  * @typedef {object} TextStyle
  * @prop {"left" | "center" | "right"} align
@@ -142,6 +144,8 @@ export const TextStyle = {
     glyphHeight: 7,
     lineHeight: 8,
     charOffset: 32,
+    iconsCharCode: 128,
+    fallbackCharCode: 127,
   },
 };
 
@@ -274,7 +278,10 @@ export function writeLine(text, x, y) {
   /** @type {CanvasImageSource} */
   let source = spritesImage;
 
-  let fallbackSprite = required(font.sprites[127]);
+  let fallbackSprite = required(
+    font.sprites[font.fallbackCharCode - font.charOffset],
+  );
+
   let width = text.length * font.glyphWidth;
   if (align === "right") x -= width;
   if (align === "center") x -= Math.floor(width / 2);
@@ -290,9 +297,9 @@ export function writeLine(text, x, y) {
     let dx = Math.round(x + i * font.glyphWidth);
     let dy = Math.round(y);
 
-    // Any glyphs with char code >= 128 are considered icons and should be
-    // drawn from the original texture instead of the recolored one.
-    let glyphSource = code < 128 ? source : spritesImage;
+    // Any glyphs in this range are considered icons and should be drawn from
+    // the original texture instead of the recolored one.
+    let glyphSource = code < font.iconsCharCode ? source : spritesImage;
 
     ctx.drawImage(glyphSource, sx, sy, sw, sh, dx, dy, sw, sh);
   }
