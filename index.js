@@ -14,7 +14,7 @@ import {
   YoungGryphon,
 } from "./cards.js";
 import { Card, Game } from "./game.js";
-import { MenuScreen } from "./screens.js";
+import { BoardScreen, MenuScreen } from "./screens.js";
 import { UI } from "./ui.js";
 import { randomItem } from "./utils.js";
 
@@ -38,9 +38,10 @@ for (let i = 0; i < 10; i++) {
   ]);
   let card = new Card(type);
   let tile = randomItem(game.board.tiles);
+
   if (tile?.isEmpty()) {
     tile.add(card);
   }
 }
 
-UI.init(new MenuScreen(game));
+UI.init(new BoardScreen(game));
