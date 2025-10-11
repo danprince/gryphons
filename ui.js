@@ -478,7 +478,9 @@ export class VFX {
   static render() {
     for (let anim of this.animations) {
       let sprite = anim.sprites[anim.frame];
-      drawSprite(sprite, anim.x, anim.y);
+      if (sprite) {
+        drawSprite(sprite, anim.x, anim.y);
+      }
     }
   }
 

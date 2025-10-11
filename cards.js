@@ -237,7 +237,7 @@ export const Gladiator = new CardType({
       );
     }
 
-    if (enemy.counter <= 1) {
+    if (enemy && enemy.counter <= 1) {
       game.board.addActionsBottom(
         new Damage({ amount: -1, card, vfx: VFX.heal }),
       );

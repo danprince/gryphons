@@ -38,7 +38,7 @@ for (let i = 0; i < 10; i++) {
   ]);
   let card = new Card(type);
   let tile = randomItem(game.board.tiles);
-  if (tile.isEmpty()) {
+  if (tile?.isEmpty()) {
     tile.add(card);
   }
 }

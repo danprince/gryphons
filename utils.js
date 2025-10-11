@@ -130,10 +130,26 @@ export function removeFromArray(array, item) {
 }
 
 /**
+ * Return a random item from a non-empty array.
+ * @template T
+ * @overload
+ * @param {[T, ...T[]]} array
+ * @returns {T}
+ */
+
+/**
+ * Return a random item from an array that might be empty.
+ * @template T
+ * @overload
+ * @param {T[]} array
+ * @returns {T | undefined}
+ */
+
+/**
  * Return a random item from an array.
  * @template T
  * @param {T[]} array
- * @returns {T}
+ * @returns {T | undefined}
  */
 export function randomItem(array) {
   return array[Math.floor(Math.random() * array.length)];

@@ -274,6 +274,7 @@ export function writeLine(text, x, y) {
   /** @type {CanvasImageSource} */
   let source = spritesImage;
 
+  let fallbackSprite = required(font.sprites[127]);
   let width = text.length * font.glyphWidth;
   if (align === "right") x -= width;
   if (align === "center") x -= Math.floor(width / 2);
@@ -283,10 +284,7 @@ export function writeLine(text, x, y) {
 
   for (let i = 0; i < text.length; i++) {
     let code = text.charCodeAt(i);
-
-    // If there's no sprite for the corresponding char code, render the
-    // fallback character.
-    let sprite = font.sprites[code - font.charOffset] ?? font.sprites[127];
+    let sprite = font.sprites[code - font.charOffset] ?? fallbackSprite;
 
     let { x: sx, y: sy, width: sw, height: sh } = sprite;
     let dx = Math.round(x + i * font.glyphWidth);
@@ -315,7 +313,8 @@ export function writeText(text, x, y, maxWidth) {
   let lines = splitText(text, maxChars);
 
   for (let i = 0; i < lines.length; i++) {
-    writeLine(lines[i], x, y + i * TextStyle.font.lineHeight);
+    let line = required(lines[i]);
+    writeLine(line, x, y + i * TextStyle.font.lineHeight);
   }
 
   return lines.length * TextStyle.font.glyphHeight;
