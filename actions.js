@@ -1,9 +1,78 @@
 // @ts-check
 
 import { gridToPixel, Timer } from "./engine.js";
-import { Action, Card, Tile } from "./game.js";
+import { Card, Game, Tile } from "./game.js";
 import { UI, VFX } from "./ui.js";
 import { required, lerp, easeInOut } from "./utils.js";
+
+/**
+ * @typedef {typeof Action.done | typeof Action.continue | typeof Action.wait} ActionResult
+ */
+
+export class Action {
+  /**
+   * Return this value from an action's perform method to indicate that the
+   * action has finished and can be removed.
+   * @type {"done"}
+   */
+  static done = "done";
+
+  /**
+   * Return this value from an action's perform method to indicate that the
+   * action needs to continue updating.
+   * @type {"continue"}
+   */
+  static continue = "continue";
+
+  /**
+   * Return this value from an action's perform method to indicate that the
+   * action needs to continue updating during the next frame.
+   * @type {"wait"}
+   */
+  static wait = "wait";
+
+  /**
+   * Quick access to the current game.
+   */
+  get game() {
+    return Game.current;
+  }
+
+  /**
+   * @return {ActionResult}
+   */
+  perform() {
+    return Action.done;
+  }
+}
+
+export class AsyncAction extends Action {
+  /**
+   * @private
+   * @type {Promise<void> | undefined}
+   */
+  _promise;
+
+  /**
+   * @private
+   */
+  _resolved = false;
+
+  perform() {
+    if (this._promise === undefined) {
+      this._promise = this.run();
+      this._promise.then(() => (this._resolved = true));
+    }
+
+    if (this._resolved) {
+      return Action.done;
+    } else {
+      return Action.wait;
+    }
+  }
+
+  async run() {}
+}
 
 export class DrawCardsUntilHandIsFull extends Action {
   perform() {
