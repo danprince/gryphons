@@ -369,6 +369,12 @@ export class Pile {
    */
   cards = [];
 
+  /**
+   * @private
+   * @type {Set<Card>}
+   */
+  set = new Set();
+
   get size() {
     return this.cards.length;
   }
@@ -386,27 +392,48 @@ export class Pile {
 
   reset() {
     this.cards.length = 0;
+    this.set.clear();
   }
 
   /**
    * @param {...Card} cards
    */
   addToTop(...cards) {
-    this.cards.push(...cards);
+    for (let card of cards) {
+      if (!this.set.has(card)) {
+        this.set.add(card);
+        this.cards.push(card);
+      } else {
+        throw new Error("Attempt to add a duplicate card to a pile!");
+      }
+    }
   }
 
   /**
    * @param {...Card} cards
    */
   addToBottom(...cards) {
-    this.cards.unshift(...cards);
+    for (let card of cards) {
+      if (!this.set.has(card)) {
+        this.set.add(card);
+        this.cards.unshift(card);
+      } else {
+        throw new Error("Attempt to add a duplicate card to a pile!");
+      }
+    }
   }
 
   /**
    * @return {Card | undefined}
    */
   removeFromTop() {
-    return this.cards.pop();
+    let card = this.cards.pop();
+
+    if (card) {
+      this.set.delete(card);
+    }
+
+    return card;
   }
 
   /**
@@ -420,7 +447,15 @@ export class Pile {
    * @param {Card} card
    */
   remove(card) {
+    this.set.delete(card);
     removeFromArray(this.cards, card);
+  }
+
+  /**
+   * @param {Card} card
+   */
+  includes(card) {
+    return this.set.has(card);
   }
 
   shuffle() {
