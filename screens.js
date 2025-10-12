@@ -126,7 +126,7 @@ class TextButtonStyle {
     activeSprite: Sprites.button_active,
     labelColor: Colors.sepia,
     hoverLabelColor: Colors.kombucha,
-    activeLabelColor: Colors.sepia,
+    activeLabelColor: Colors.kombucha,
   });
 
   /**
