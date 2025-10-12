@@ -12,7 +12,6 @@ export class DrawCardsUntilHandIsFull extends Action {
     if (board.isHandFull()) {
       return Action.done;
     } else if (board.discardPile.isEmpty() && board.drawPile.isEmpty()) {
-      Message.show("You don't have any cards left!");
       return Action.done;
     } else {
       board.addActionsTop(new DrawCard());
