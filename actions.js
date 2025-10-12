@@ -69,7 +69,7 @@ export class DrawCard extends Action {
       let k = easeInOut(t);
       let hop = Math.sin(k * Math.PI) * 4;
       card.bounds.x = lerp(x0, x1, k);
-      card.bounds.y = lerp(y0, y1, k) + hop;
+      card.bounds.y = lerp(y0, y1, k) - hop;
     });
 
     card.interactive = true;
