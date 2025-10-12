@@ -41,6 +41,8 @@ export const Colors = {
   waterfall: "#30be9f",
   red: "#bf4848",
   eiffel: "#9b8d7e",
+  kombucha: "#d9a066",
+  sepia: "#704517",
 };
 
 /**

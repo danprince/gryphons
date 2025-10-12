@@ -9,8 +9,9 @@ import {
   gridToPixel,
   Timer,
   fillRect,
+  drawNineSlice,
 } from "./engine.js";
-import { UI, GameInfo, Screen, alignToRow, drawFrame } from "./ui.js";
+import { UI, GameInfo, Screen, alignToRow, drawFrame, Colors } from "./ui.js";
 import { Rectangle, lerp } from "./utils.js";
 import * as Sprites from "./sprites.js";
 
@@ -116,6 +117,109 @@ class SpriteButton {
     if (this.isDown()) sprite = this.activeSprite;
     drawSprite(sprite, this.bounds.x, this.bounds.y);
     ctx.globalAlpha = 1;
+  }
+}
+
+class TextButtonStyle {
+  static default = new TextButtonStyle({
+    sprite: Sprites.button,
+    activeSprite: Sprites.button_active,
+    labelColor: Colors.sepia,
+    hoverLabelColor: Colors.kombucha,
+    activeLabelColor: Colors.sepia,
+  });
+
+  /**
+   * @param {object} config
+   * @param {NineSliceSprite} config.sprite
+   * @param {NineSliceSprite} [config.hoverSprite]
+   * @param {NineSliceSprite} [config.activeSprite]
+   * @param {string} [config.labelColor]
+   * @param {string} [config.hoverLabelColor]
+   * @param {string} [config.activeLabelColor]
+   */
+  constructor(config) {
+    this.sprite = config.sprite;
+    this.hoverSprite = config.hoverSprite;
+    this.activeSprite = config.activeSprite;
+    this.labelColor = config.labelColor;
+    this.hoverLabelColor = config.hoverLabelColor;
+    this.activeLabelColor = config.activeLabelColor;
+  }
+}
+
+class TextButton {
+  bounds = new Rectangle();
+  label = "";
+  padding = 5;
+
+  /**
+   * @param {object} config
+   * @param {TextButtonStyle} [config.style]
+   * @param {string} config.label
+   * @param {number} [config.x]
+   * @param {number} [config.y]
+   * @param {number} [config.padding]
+   * @param {() => void} config.onClick
+   */
+  constructor(config) {
+    this.style = config.style ?? TextButtonStyle.default;
+    this.label = config.label;
+    this.bounds.x = config.x ?? this.bounds.x;
+    this.bounds.y = config.y ?? this.bounds.y;
+    this.padding = config.padding ?? this.padding;
+    this.onClick = config.onClick;
+  }
+
+  isHovered() {
+    return this.bounds.contains(UI.pointer.x, UI.pointer.y);
+  }
+
+  isDown() {
+    return UI.pointer.isDown() && this.isHovered();
+  }
+
+  isPressed() {
+    return UI.pointer.isPressed() && this.isHovered();
+  }
+
+  update() {
+    let { bounds, padding, label } = this;
+    let { font } = TextStyle;
+    bounds.w = label.length * font.glyphWidth + padding * 2;
+    bounds.h = font.glyphHeight + padding * 2;
+
+    if (this.isPressed()) {
+      this.onClick();
+    }
+  }
+
+  render() {
+    let { padding, label, style, bounds } = this;
+    let isHovered = this.isHovered();
+    let isActive = this.isDown();
+    let sprite = style.sprite;
+
+    if (isActive && style.activeSprite) {
+      sprite = style.activeSprite;
+    } else if (isHovered && style.hoverSprite) {
+      sprite = style.hoverSprite;
+    }
+
+    TextStyle.save();
+
+    if (isActive && style.activeLabelColor) {
+      TextStyle.color = style.activeLabelColor;
+    } else if (isHovered && style.hoverLabelColor) {
+      TextStyle.color = style.hoverLabelColor;
+    } else {
+      TextStyle.color = style.labelColor;
+    }
+
+    let labelOffsetY = isActive ? 1 : 0;
+    drawFrame(sprite, bounds);
+    writeLine(label, bounds.x + padding, bounds.y + padding + labelOffsetY);
+    TextStyle.restore();
   }
 }
 
@@ -249,12 +353,6 @@ export class MenuScreen extends Screen {
   newGameButton = new MenuScreenButton({
     label: "New game",
     sprite: Sprites.button_new_game,
-    onClick: () => UI.navigate(new BoardScreen(this.game)),
-  });
-
-  continueGameButton = new MenuScreenButton({
-    label: "Continue",
-    sprite: Sprites.button_draw,
     onClick: () => UI.navigate(new BoardScreen(this.game)),
   });
 
@@ -408,10 +506,10 @@ export class BoardScreen extends GameScreen {
     bannerSprite: Sprites.banner_neutral,
   });
 
-  endTurnButton = new SpriteButton({
-    sprite: Sprites.button_end_turn_2,
-    hoverSprite: Sprites.button_end_turn_2_hover,
-    activeSprite: Sprites.button_end_turn_2_active,
+  endTurnButton = new TextButton({
+    label: "END TURN",
+    x: UI.END_TURN_BUTTON.x,
+    y: UI.END_TURN_BUTTON.y,
     onClick: () => this.game.endTurn(),
   });
 
