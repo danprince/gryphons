@@ -6,10 +6,8 @@ import {
   drawSprite,
   TextStyle,
   writeLine,
-  pixelToGrid,
   gridToPixel,
   Timer,
-  drawNineSlice,
   fillRect,
 } from "./engine.js";
 import { UI, GameInfo, Screen, alignToRow, drawFrame } from "./ui.js";
@@ -423,6 +421,11 @@ export class BoardScreen extends GameScreen {
     color: "black",
   });
 
+  tablePanel = new Panel({
+    sprite: Sprites.panel_table,
+    bounds: UI.TABLE,
+  });
+
   /**
    * @type {Card | undefined}
    */
@@ -532,6 +535,7 @@ export class BoardScreen extends GameScreen {
     drawFrame(Sprites.panel_worn, UI.CENTER_PANEL);
     this.renderBoard();
 
+    this.tablePanel.render();
     this.renderPiles();
     this.renderHand();
     this.endTurnButton.render();
@@ -539,28 +543,23 @@ export class BoardScreen extends GameScreen {
   }
 
   renderPiles() {
-    drawFrame(Sprites.panel_pile, UI.DRAW_PILE);
     this.renderCardStack(
       Sprites.stack_draw,
       UI.DRAW_PILE,
       this.game.board.drawPile.size,
     );
 
-    drawFrame(Sprites.panel_pile, UI.DISCARD_PILE);
     this.renderCardStack(
       Sprites.stack_discard,
       UI.DISCARD_PILE,
       this.game.board.discardPile.size,
     );
 
-    if (this.game.board.gravePile.size > 0) {
-      drawFrame(Sprites.panel, UI.GRAVE_PILE);
-      this.renderCardStack(
-        Sprites.stack_grave,
-        UI.GRAVE_PILE,
-        this.game.board.gravePile.size,
-      );
-    }
+    this.renderCardStack(
+      Sprites.stack_grave,
+      UI.GRAVE_PILE,
+      this.game.board.gravePile.size,
+    );
   }
 
   /**
