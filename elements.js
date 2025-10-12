@@ -290,6 +290,7 @@ export class CardStackButton extends Button {
   /**
    * @param {object} config
    * @param {number} [config.size]
+   * @param {string} [config.label]
    * @param {Sprite} config.cardBackSprite
    * @param {Sprite} [config.emptyStackSprite]
    * @param {number} [config.gap]
@@ -303,6 +304,7 @@ export class CardStackButton extends Button {
   constructor(config) {
     super(config);
     this.size = config.size ?? 0;
+    this.label = config.label;
     this.cardBackSprite = config.cardBackSprite;
     this.emptyStackSprite = config.emptyStackSprite ?? Sprites.stack_empty;
     this.gap = config.gap ?? this.gap;
@@ -313,10 +315,7 @@ export class CardStackButton extends Button {
   render() {
     let { bounds, size, gap, cardsPerStack, maxStackSize } = this;
 
-    let stackSize = Math.min(
-      Math.ceil(size / cardsPerStack),
-      maxStackSize,
-    );
+    let stackSize = Math.min(Math.ceil(size / cardsPerStack), maxStackSize);
 
     if (stackSize === 0) {
       drawSprite(Sprites.stack_empty, bounds.x, bounds.y);
@@ -329,7 +328,13 @@ export class CardStackButton extends Button {
     TextStyle.save();
     TextStyle.align = "center";
     TextStyle.baseline = "middle";
-    writeLine(`${size}`, bounds.center.x, bounds.y + bounds.h);
+
+    if (this.isHovered() && this.label) {
+      writeLine(this.label, bounds.center.x + 1, bounds.y + bounds.h);
+    } else {
+      writeLine(`${size}`, bounds.center.x, bounds.y + bounds.h);
+    }
+
     TextStyle.restore();
   }
 }

@@ -228,16 +228,19 @@ export class GameScreen extends Screen {
   });
 
   drawStackButton = new CardStackButton({
+    label: "Draw",
     cardBackSprite: Sprites.stack_draw,
     bounds: UI.DRAW_PILE,
   });
 
   discardStackButton = new CardStackButton({
+    label: "Disc.",
     cardBackSprite: Sprites.stack_discard,
     bounds: UI.DISCARD_PILE,
   });
 
   graveStackButton = new CardStackButton({
+    label: "Grave",
     cardBackSprite: Sprites.stack_grave,
     bounds: UI.GRAVE_PILE,
   });
