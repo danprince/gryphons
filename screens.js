@@ -97,6 +97,10 @@ class SpriteButton {
     return !this.disabled && this.bounds.contains(UI.pointer.x, UI.pointer.y);
   }
 
+  isDown() {
+    return !this.disabled && UI.pointer.isDown() && this.isHovered();
+  }
+
   isPressed() {
     return !this.disabled && UI.pointer.isPressed() && this.isHovered();
   }
@@ -111,7 +115,7 @@ class SpriteButton {
     ctx.globalAlpha = this.opacity;
     let sprite = this.sprite;
     if (this.isHovered()) sprite = this.hoverSprite;
-    if (this.isPressed()) sprite = this.activeSprite;
+    if (this.isDown()) sprite = this.activeSprite;
     drawSprite(sprite, this.bounds.x, this.bounds.y);
     ctx.globalAlpha = 1;
   }
