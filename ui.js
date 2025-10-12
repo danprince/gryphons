@@ -19,6 +19,7 @@ import {
 import {
   assert,
   clamp,
+  easeInOut,
   lerp,
   randomItem,
   Rectangle,
@@ -408,8 +409,9 @@ export class Message {
     let y1 = this.bounds.y;
 
     await Timer.promise(300, (t) => {
-      this.bounds.y = lerp(y0, y1, t);
-      this.opacity = lerp(0, 1, t * 2);
+      let k = easeInOut(t);
+      this.bounds.y = lerp(y0, y1, k);
+      this.opacity = lerp(0, 1, k * 2);
     });
   }
 
@@ -419,8 +421,9 @@ export class Message {
     this.visible = false;
 
     await Timer.promise(300, (t) => {
-      this.bounds.y = lerp(y0, y1, t);
-      this.opacity = lerp(1, 0, t);
+      let k = easeInOut(t);
+      this.bounds.y = lerp(y0, y1, k);
+      this.opacity = lerp(1, 0, k);
     });
   }
 

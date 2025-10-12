@@ -423,8 +423,29 @@ export function shuffle(array) {
 }
 
 /**
- * @param {number} t
+ * @typedef {(t: number) => number} Easing
+ */
+
+/**
+ * Linear easing at a constant speed.
+ * @type {Easing}
+ */
+export function easeLinear(t) {
+  return t;
+}
+
+/**
+ * Eases in and out slowly.
+ * @type {Easing}
  */
 export function easeInOut(t) {
-  return Math.sin(t * Math.PI);
+  return (t *= 2) < 1 ? 0.5 * t * t : -0.5 * (--t * (t - 2) - 1);
+}
+
+/**
+ * Eases out beyond the end then pulls back.
+ * @type {Easing}
+ */
+export function easeOutBack(t) {
+  return --t * t * ((1.70158 + 1) * t + 1.70158) + 1;
 }
