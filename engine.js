@@ -99,6 +99,7 @@ export function resize(width, height) {
  * @prop {"left" | "center" | "right"} align
  * @prop {"top" | "middle" | "bottom"} baseline
  * @prop {string | undefined} color
+ * @prop {string | undefined} backgroundColor
  * @prop {SpriteFont} font
  */
 
@@ -114,6 +115,7 @@ export const TextStyle = {
       baseline: this.baseline,
       color: this.color,
       font: this.font,
+      backgroundColor: this.backgroundColor,
     });
   },
   restore() {
@@ -122,6 +124,7 @@ export const TextStyle = {
     this.baseline = settings.baseline;
     this.color = settings.color;
     this.font = settings.font;
+    this.backgroundColor = settings.backgroundColor;
   },
   /**
    * @type {TextStyle["align"]}
@@ -135,6 +138,10 @@ export const TextStyle = {
    * @type {TextStyle["color"]}
    */
   color: undefined,
+  /**
+   * @type {TextStyle["backgroundColor"]}
+   */
+  backgroundColor: undefined,
   /**
    * @type {SpriteFont}
    */
@@ -273,7 +280,7 @@ function recolor(image, color) {
  * @return {number} The height of the text.
  */
 export function writeLine(text, x, y) {
-  let { color, font, align, baseline } = TextStyle;
+  let { color, backgroundColor, font, align, baseline } = TextStyle;
 
   /** @type {CanvasImageSource} */
   let source = spritesImage;
@@ -283,11 +290,17 @@ export function writeLine(text, x, y) {
   );
 
   let width = text.length * font.glyphWidth;
+  let height = font.glyphHeight;
   if (align === "right") x -= width;
   if (align === "center") x -= Math.floor(width / 2);
   if (baseline === "middle") y -= Math.floor(font.glyphHeight / 2);
   if (baseline === "bottom") y -= font.glyphHeight;
   if (color) source = recolor(source, color);
+
+  if (backgroundColor) {
+    let pad = 1;
+    fillRect(x - pad, y, width + pad, height, backgroundColor);
+  }
 
   for (let i = 0; i < text.length; i++) {
     let code = text.charCodeAt(i);

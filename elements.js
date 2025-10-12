@@ -328,6 +328,7 @@ export class CardStackButton extends Button {
     TextStyle.save();
     TextStyle.align = "center";
     TextStyle.baseline = "middle";
+    TextStyle.backgroundColor = "black";
 
     if (this.isHovered() && this.label) {
       writeLine(this.label, bounds.center.x + 1, bounds.y + bounds.h);
