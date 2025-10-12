@@ -8,270 +8,22 @@ import {
   writeLine,
   gridToPixel,
   Timer,
-  fillRect,
-  drawNineSlice,
 } from "./engine.js";
-import { UI, GameInfo, Screen, alignToRow, drawFrame, Colors } from "./ui.js";
+import { UI, GameInfo, Screen, alignToRow, drawFrame } from "./ui.js";
 import { Rectangle, lerp } from "./utils.js";
 import * as Sprites from "./sprites.js";
+import {
+  CardStackButton,
+  CounterButton,
+  Panel,
+  SpriteButton,
+  TextButton,
+} from "./elements.js";
 
 /**
- * @import { Point } from "./utils.js";
  * @import { Card, Game } from "./game.js";
- * @import { Sprite, NineSliceSprite } from "./sprites.js";
+ * @import { Sprite } from "./sprites.js";
  */
-
-export class Panel {
-  /**
-   * @param {object} config
-   * @param {number} [config.opacity]
-   * @param {Sprite | NineSliceSprite} [config.sprite]
-   * @param {Rectangle} [config.bounds]
-   * @param {number} [config.x]
-   * @param {number} [config.y]
-   * @param {number} [config.width]
-   * @param {number} [config.height]
-   * @param {string} [config.color]
-   */
-  constructor(config) {
-    this.opacity = config.opacity ?? 1;
-    this.sprite = config.sprite;
-    this.color = config.color;
-
-    this.bounds =
-      config.bounds ??
-      new Rectangle(
-        config.x ?? this.sprite?.x ?? 0,
-        config.y ?? this.sprite?.y ?? 0,
-        config.width ?? this.sprite?.width ?? 0,
-        config.height ?? this.sprite?.height ?? 0,
-      );
-  }
-
-  render() {
-    ctx.globalAlpha = this.opacity;
-
-    if (this.color) {
-      fillRect(
-        this.bounds.x,
-        this.bounds.y,
-        this.bounds.w,
-        this.bounds.h,
-        this.color,
-      );
-    }
-
-    if (this.sprite?.center) {
-      drawFrame(/** @type {NineSliceSprite} */ (this.sprite), this.bounds);
-    } else if (this.sprite) {
-      drawSprite(this.sprite, this.bounds.x, this.bounds.y);
-    }
-
-    ctx.globalAlpha = 1;
-  }
-}
-
-class SpriteButton {
-  bounds = new Rectangle();
-  opacity = 1;
-  disabled = false;
-
-  /**
-   * @param {object} config
-   * @param {Sprite} config.sprite
-   * @param {Sprite} [config.hoverSprite]
-   * @param {Sprite} [config.activeSprite]
-   * @param {() => void} [config.onClick]
-   */
-  constructor(config) {
-    this.sprite = config.sprite;
-    this.hoverSprite = config.hoverSprite ?? config.sprite;
-    this.activeSprite = config.activeSprite ?? config.sprite;
-    this.bounds.w = this.sprite.width;
-    this.bounds.h = this.sprite.height;
-    this.onClick = config.onClick;
-  }
-
-  isHovered() {
-    return !this.disabled && this.bounds.contains(UI.pointer.x, UI.pointer.y);
-  }
-
-  isDown() {
-    return !this.disabled && UI.pointer.isDown() && this.isHovered();
-  }
-
-  isPressed() {
-    return !this.disabled && UI.pointer.isPressed() && this.isHovered();
-  }
-
-  update() {
-    if (this.isPressed()) {
-      this.onClick?.();
-    }
-  }
-
-  render() {
-    ctx.globalAlpha = this.opacity;
-    let sprite = this.sprite;
-    if (this.isHovered()) sprite = this.hoverSprite;
-    if (this.isDown()) sprite = this.activeSprite;
-    drawSprite(sprite, this.bounds.x, this.bounds.y);
-    ctx.globalAlpha = 1;
-  }
-}
-
-class TextButtonStyle {
-  static default = new TextButtonStyle({
-    sprite: Sprites.button,
-    activeSprite: Sprites.button_active,
-    labelColor: Colors.sepia,
-    hoverLabelColor: Colors.kombucha,
-    activeLabelColor: Colors.kombucha,
-  });
-
-  /**
-   * @param {object} config
-   * @param {NineSliceSprite} config.sprite
-   * @param {NineSliceSprite} [config.hoverSprite]
-   * @param {NineSliceSprite} [config.activeSprite]
-   * @param {string} [config.labelColor]
-   * @param {string} [config.hoverLabelColor]
-   * @param {string} [config.activeLabelColor]
-   */
-  constructor(config) {
-    this.sprite = config.sprite;
-    this.hoverSprite = config.hoverSprite;
-    this.activeSprite = config.activeSprite;
-    this.labelColor = config.labelColor;
-    this.hoverLabelColor = config.hoverLabelColor;
-    this.activeLabelColor = config.activeLabelColor;
-  }
-}
-
-class TextButton {
-  bounds = new Rectangle();
-  label = "";
-  padding = 5;
-
-  /**
-   * @param {object} config
-   * @param {TextButtonStyle} [config.style]
-   * @param {string} config.label
-   * @param {number} [config.x]
-   * @param {number} [config.y]
-   * @param {number} [config.padding]
-   * @param {() => void} config.onClick
-   */
-  constructor(config) {
-    this.style = config.style ?? TextButtonStyle.default;
-    this.label = config.label;
-    this.bounds.x = config.x ?? this.bounds.x;
-    this.bounds.y = config.y ?? this.bounds.y;
-    this.padding = config.padding ?? this.padding;
-    this.onClick = config.onClick;
-  }
-
-  isHovered() {
-    return this.bounds.contains(UI.pointer.x, UI.pointer.y);
-  }
-
-  isDown() {
-    return UI.pointer.isDown() && this.isHovered();
-  }
-
-  isPressed() {
-    return UI.pointer.isPressed() && this.isHovered();
-  }
-
-  update() {
-    let { bounds, padding, label } = this;
-    let { font } = TextStyle;
-    bounds.w = label.length * font.glyphWidth + padding * 2;
-    bounds.h = font.glyphHeight + padding * 2;
-
-    if (this.isPressed()) {
-      this.onClick();
-    }
-  }
-
-  render() {
-    let { padding, label, style, bounds } = this;
-    let isHovered = this.isHovered();
-    let isActive = this.isDown();
-    let sprite = style.sprite;
-
-    if (isActive && style.activeSprite) {
-      sprite = style.activeSprite;
-    } else if (isHovered && style.hoverSprite) {
-      sprite = style.hoverSprite;
-    }
-
-    TextStyle.save();
-
-    if (isActive && style.activeLabelColor) {
-      TextStyle.color = style.activeLabelColor;
-    } else if (isHovered && style.hoverLabelColor) {
-      TextStyle.color = style.hoverLabelColor;
-    } else {
-      TextStyle.color = style.labelColor;
-    }
-
-    let labelOffsetY = isActive ? 1 : 0;
-    drawFrame(sprite, bounds);
-    writeLine(label, bounds.x + padding, bounds.y + padding + labelOffsetY);
-    TextStyle.restore();
-  }
-}
-
-export class TileButton extends SpriteButton {
-  /**
-   * @type {number | undefined}
-   */
-  counter;
-
-  /**
-   * @param {object} config
-   * @param {import("./sprites").Sprite} config.sprite
-   * @param {import("./sprites").Sprite} [config.hoverSprite]
-   * @param {import("./sprites").Sprite} [config.activeSprite]
-   * @param {() => number} [config.getCounter]
-   * @param {() => void} [config.onClick]
-   */
-  constructor(config) {
-    super(config);
-    this.getCounter = config.getCounter;
-  }
-
-  update() {
-    super.update();
-    this.counter = this.getCounter?.();
-  }
-
-  render() {
-    super.render();
-
-    let isHovered = this.isHovered();
-
-    ctx.globalAlpha = this.opacity;
-
-    if (isHovered) {
-      drawSprite(Sprites.ui_tile_active, this.bounds.x, this.bounds.y);
-    }
-
-    if (this.counter !== undefined) {
-      let label = `${this.counter}`;
-      let x = this.bounds.center.x;
-      let y = this.bounds.y + this.bounds.h + 2;
-      TextStyle.save();
-      TextStyle.align = "center";
-      TextStyle.baseline = "bottom";
-      writeLine(label, x, y);
-      TextStyle.restore();
-    }
-
-    ctx.globalAlpha = 1;
-  }
-}
 
 class MenuScreenButton extends SpriteButton {
   /**
@@ -455,24 +207,39 @@ export class GameScreen extends Screen {
    */
   info;
 
-  leaveButton = new TileButton({
+  leaveButton = new CounterButton({
     sprite: Sprites.button_leave,
     onClick: () => UI.navigate(new MenuScreen(this.game)),
   });
 
-  goldButton = new TileButton({
+  goldButton = new CounterButton({
     sprite: Sprites.button_gold,
     getCounter: () => this.game.gold,
   });
 
-  feathersButton = new TileButton({
+  feathersButton = new CounterButton({
     sprite: Sprites.button_feather,
     getCounter: () => this.game.feathers,
   });
 
-  deckButton = new TileButton({
+  deckButton = new CounterButton({
     sprite: Sprites.button_deck,
     getCounter: () => this.game.deck.size,
+  });
+
+  drawStackButton = new CardStackButton({
+    cardBackSprite: Sprites.stack_draw,
+    bounds: UI.DRAW_PILE,
+  });
+
+  discardStackButton = new CardStackButton({
+    cardBackSprite: Sprites.stack_discard,
+    bounds: UI.DISCARD_PILE,
+  });
+
+  graveStackButton = new CardStackButton({
+    cardBackSprite: Sprites.stack_grave,
+    bounds: UI.GRAVE_PILE,
   });
 
   /**
@@ -516,7 +283,7 @@ export class BoardScreen extends GameScreen {
   handPanel = new Panel({
     sprite: Sprites.panel_hand,
     bounds: UI.HAND.clone().grow(3),
-    color: "black",
+    backgroundColor: "black",
   });
 
   tablePanel = new Panel({
@@ -556,6 +323,15 @@ export class BoardScreen extends GameScreen {
     this.goldButton.update();
     this.feathersButton.update();
     this.deckButton.update();
+
+    this.drawStackButton.size = this.game.board.drawPile.size;
+    this.drawStackButton.update();
+
+    this.discardStackButton.size = this.game.board.discardPile.size;
+    this.discardStackButton.update();
+
+    this.graveStackButton.size = this.game.board.gravePile.size;
+    this.graveStackButton.update();
 
     this.endTurnButton.update();
 
@@ -641,23 +417,9 @@ export class BoardScreen extends GameScreen {
   }
 
   renderPiles() {
-    this.renderCardStack(
-      Sprites.stack_draw,
-      UI.DRAW_PILE,
-      this.game.board.drawPile.size,
-    );
-
-    this.renderCardStack(
-      Sprites.stack_discard,
-      UI.DISCARD_PILE,
-      this.game.board.discardPile.size,
-    );
-
-    this.renderCardStack(
-      Sprites.stack_grave,
-      UI.GRAVE_PILE,
-      this.game.board.gravePile.size,
-    );
+    this.drawStackButton.render();
+    this.discardStackButton.render();
+    this.graveStackButton.render();
   }
 
   /**
