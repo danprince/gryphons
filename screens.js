@@ -415,8 +415,10 @@ export class BoardScreen extends GameScreen {
     this.tablePanel.render();
     this.renderPiles();
     this.renderHand();
-    this.endTurnButton.render();
+    this.renderHandCards();
     this.renderPileCards();
+
+    this.endTurnButton.render();
   }
 
   renderPiles() {
@@ -490,7 +492,9 @@ export class BoardScreen extends GameScreen {
       let y = bounds.y;
       drawSprite(Sprites.tile_empty, x, y);
     }
+  }
 
+  renderHandCards() {
     for (let card of this.game.board.hand) {
       card?.render();
     }
