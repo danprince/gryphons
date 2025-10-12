@@ -241,17 +241,11 @@ export class MoveToGravePile extends Action {
   }
 
   perform() {
-    // Remove the card from the player's deck.
-    this.game.deck.remove(this.card);
-
-    // Run the onDeath triggers for the card.
     this.game.onDeath(this.card);
-
+    this.game.deck.remove(this.card);
     this.game.board.removeCard(this.card);
-
     this.game.board.gravePile.addToTop(this.card);
     this.animate();
-
     return Action.done;
   }
 

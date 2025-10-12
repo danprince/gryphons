@@ -334,6 +334,10 @@ export class Board {
   update(dt) {
     this.updateActions();
 
+    for (let card of this.gravePile) {
+      card.update(dt);
+    }
+
     for (let card of this.drawPile) {
       card.update(dt);
     }
