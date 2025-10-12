@@ -421,6 +421,7 @@ export class Message {
   }
 
   render() {
+    if (!this.visible || this.opacity === 0) return;
     ctx.globalAlpha = this.opacity;
     drawFrame(Sprites.panel, this.bounds);
     TextStyle.save();
