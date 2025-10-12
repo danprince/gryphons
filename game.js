@@ -854,3 +854,30 @@ export class Tile {
     card.bounds.y = pos.y;
   }
 }
+
+/**
+ * @param {Game} game
+ * @param {Card} card
+ * @param {CardCategory} category
+ * @returns {Generator<Card>}
+ */
+export function* getConnectedCards(game, card, category = card.type.category) {
+  let seen = new Set([card]);
+  let stack = [card];
+
+  while (stack.length > 0) {
+    let card = required(stack.pop());
+    let neighbours = game.board.getAdjacentCards(card);
+
+    for (let neighbour of neighbours) {
+      if (!seen.has(neighbour)) {
+        seen.add(neighbour);
+
+        if (neighbour.type.category === category) {
+          yield neighbour;
+          stack.push(neighbour);
+        }
+      }
+    }
+  }
+}

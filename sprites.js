@@ -27,6 +27,8 @@
  */
 
 export const $url = "./sprites.png";
+export const vfx_magic = { y: 288, url: $url, height: 23, width: 96, x: 120, };
+export const card_commander = { y: 72, url: $url, height: 24, width: 24, x: 312, };
 export const button_active = { y: 72, url: $url, height: 10, width: 7, center: { y: 4, width: 1, height: 2, x: 3, }, x: 7, };
 export const button = { y: 72, url: $url, height: 10, width: 7, center: { y: 3, width: 1, height: 2, x: 3, }, x: 0, };
 export const stack_grave = { y: 72, url: $url, height: 24, width: 24, x: 96, };
@@ -92,7 +94,7 @@ export const card_bones = { y: 120, url: $url, height: 24, width: 24, x: 216, };
 export const icon_skull = { y: 0, url: $url, height: 8, width: 8, x: 112, };
 export const vfx_heal = { y: 264, url: $url, height: 24, width: 96, x: 120, };
 export const icon_heal = { y: 8, url: $url, height: 8, width: 8, x: 64, };
-export const card_trapper = { y: 72, url: $url, height: 24, width: 24, x: 240, };
+export const card_wizard = { y: 72, url: $url, height: 24, width: 24, x: 240, };
 export const card_hero = { y: 72, url: $url, height: 24, width: 24, x: 264, };
 export const icon_flying = { y: 8, url: $url, height: 8, width: 8, x: 72, };
 export const card_restless_gryphon = { y: 96, url: $url, height: 24, width: 24, x: 288, };

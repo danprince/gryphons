@@ -600,6 +600,7 @@ export class VFX {
   static slash = new VFX(Sprites.vfx_slash);
   static claw = new VFX(Sprites.vfx_claw);
   static heal = new VFX(Sprites.vfx_heal);
+  static magic = new VFX(Sprites.vfx_magic);
 
   /**
    * @type {SpriteAnimation[]}

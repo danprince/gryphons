@@ -3,6 +3,7 @@
 import {
   Bones,
   Cleric,
+  Commander,
   Gladiator,
   Gryphon,
   Hero,
@@ -11,6 +12,7 @@ import {
   Lich,
   RestlessGryphon,
   Rocks,
+  Wizard,
   YoungGryphon,
 } from "./cards.js";
 import { Card, Game } from "./game.js";
@@ -21,7 +23,16 @@ import { randomItem } from "./utils.js";
 let game = new Game();
 
 for (let i = 0; i < 20; i++) {
-  let type = randomItem([Hunter, Cleric, Knight, Hero, Lich, Gladiator]);
+  let type = randomItem([
+    Hunter,
+    Cleric,
+    Knight,
+    Hero,
+    Lich,
+    Gladiator,
+    Commander,
+    Wizard,
+  ]);
   let card = new Card(type);
   game.deck.addToTop(card);
 }

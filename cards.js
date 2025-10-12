@@ -7,11 +7,19 @@ import {
   ReturnCardToDrawPile,
   CreateCardInHand,
   DestroyCard,
+  Delay,
 } from "./actions.js";
-import { Card, CardCategory, CardEffect, CardType } from "./game.js";
+import {
+  Card,
+  CardCategory,
+  CardEffect,
+  CardType,
+  Game,
+  getConnectedCards,
+} from "./game.js";
 import * as Sprites from "./sprites.js";
 import { VFX } from "./ui.js";
-import { randomItem } from "./utils.js";
+import { randomItem, required } from "./utils.js";
 
 export const Human = new CardCategory({
   counterFrameSprite: Sprites.counter_frame_human,
@@ -274,4 +282,40 @@ export const Thrall = new CardType({
   description: "Attacks one adjacent gryphon",
   counter: 1,
   effects: [AttackOneRandomMonster],
+});
+
+export const Commander = new CardType({
+  category: Human,
+  sprite: Sprites.card_commander,
+  name: "Commander",
+  description: "Return connected cards to the draw pile",
+  counter: 1,
+  onPlay(game, card) {
+    for (let friend of getConnectedCards(game, card)) {
+      game.board.addActionsBottom(
+        new ReturnCardToDrawPile(friend),
+        new Delay(50),
+      );
+    }
+  },
+});
+
+export const Wizard = new CardType({
+  category: Human,
+  sprite: Sprites.card_wizard,
+  name: "Wizard",
+  description: "Deal damage to all connected enemies.",
+  counter: 1,
+  onPlay(game, card) {
+    for (let enemy of getConnectedCards(game, card, Monster)) {
+      game.board.addActionsBottom(
+        new Damage({
+          card: enemy,
+          amount: 1,
+          vfx: VFX.magic,
+        }),
+        new Delay(50),
+      );
+    }
+  },
 });

@@ -1,7 +1,7 @@
 // @ts-check
 
 import { gridToPixel, Timer } from "./engine.js";
-import { Action, Card, Tile } from "./game.js";
+import { Action, AsyncAction, Card, Tile } from "./game.js";
 import { Message, UI, VFX } from "./ui.js";
 import { required, lerp, easeInOut } from "./utils.js";
 
@@ -472,6 +472,22 @@ export class CreateCardInHand extends Action {
       done: () => {
         card.visible = false;
       },
+    });
+  }
+}
+
+export class Delay extends AsyncAction {
+  /**
+   * @param {number} duration
+   */
+  constructor(duration) {
+    super();
+    this.duration = duration;
+  }
+
+  run() {
+    return new Promise((resolve) => {
+      setTimeout(resolve, this.duration);
     });
   }
 }
