@@ -67,7 +67,7 @@ export class DrawCard extends Action {
 
     await Timer.promise(300, (t) => {
       card.bounds.x = lerp(x0, x1, t);
-      card.bounds.y = lerp(y0, y1, t) - easeInOut(t) * 10;
+      card.bounds.y = lerp(y0, y1, t) + easeInOut(t) * 4;
     });
 
     card.interactive = true;
@@ -104,9 +104,9 @@ export class DiscardCard extends Action {
 
     this.card.interactive = false;
 
-    await Timer.promise(300, (t) => {
+    await Timer.promise(200, (t) => {
       this.card.bounds.x = lerp(x0, x1, t);
-      this.card.bounds.y = lerp(y0, y1, t) + easeInOut(t) * 10;
+      this.card.bounds.y = lerp(y0, y1, t) - easeInOut(t) * 4;
     });
 
     this.card.visible = false;
