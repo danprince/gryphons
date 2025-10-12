@@ -1,6 +1,6 @@
 // @ts-check
 
-import { ctx, drawSprite, TextStyle, writeLine } from "./engine.js";
+import { ctx, drawSprite, TextStyle, Timer, writeLine } from "./engine.js";
 import { Colors, UI } from "./ui.js";
 import {
   assert,
@@ -53,6 +53,7 @@ export class Game {
     // Move the cards to the draw pile visually.
     for (let card of this.board.drawPile) {
       card.visible = false;
+      card.interactive = false;
     }
 
     // Draw the initial round of cards.
@@ -333,12 +334,20 @@ export class Board {
   update(dt) {
     this.updateActions();
 
+    for (let card of this.drawPile) {
+      card.update(dt);
+    }
+
+    for (let card of this.discardPile) {
+      card.update(dt);
+    }
+
     for (let card of this.hand) {
-      card?.update();
+      card?.update(dt);
     }
 
     for (let tile of this.tiles) {
-      tile.card?.update();
+      tile.card?.update(dt);
     }
   }
 
@@ -644,6 +653,13 @@ export class Card {
   effects = [];
 
   /**
+   * A mutually exclusive timer for animating this card.
+   * @private
+   * @type {Timer | undefined}
+   */
+  animationTimer;
+
+  /**
    * @param {CardType} type
    */
   constructor(type) {
@@ -677,6 +693,20 @@ export class Card {
    */
   isInPlay() {
     return this.tile !== Tile.none;
+  }
+
+  /**
+   * Create a card specific timer, replacing any other timers that were active
+   * on this card. Useful to make sure that multiple animations don't run at
+   * once.
+   *
+   * @param {object} config
+   * @param {number} config.duration
+   * @param {(progress: number) => void} [config.update]
+   * @param {() => void} [config.done]
+   */
+  animate(config) {
+    this.animationTimer = new Timer(config);
   }
 
   /**
@@ -718,9 +748,28 @@ export class Card {
     }
 
     ctx.globalAlpha = 1;
+
+    if (UI.debug) {
+      ctx.save();
+      ctx.strokeStyle = "cyan";
+      ctx.strokeRect(x + 0.5, y + 0.5, this.bounds.w - 1, this.bounds.h - 1);
+      ctx.restore();
+    }
   }
 
-  update() {
+  /**
+   * @param {number} dt
+   */
+  update(dt) {
+    if (this.animationTimer) {
+      this.animationTimer.update(dt);
+      UI.needsRender = true;
+    }
+
+    if (this.animationTimer?.isDone()) {
+      this.animationTimer = undefined;
+    }
+
     if (this.isHovered()) {
       UI.inspectCard(this);
     }

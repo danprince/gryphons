@@ -65,14 +65,19 @@ export class DrawCard extends Action {
     card.visible = true;
     card.interactive = false;
 
-    await Timer.promise(300, (t) => {
-      let k = easeInOut(t);
-      let hop = Math.sin(k * Math.PI) * 4;
-      card.bounds.x = lerp(x0, x1, k);
-      card.bounds.y = lerp(y0, y1, k) - hop;
+    card.animate({
+      duration: 300,
+      update: (t) => {
+        let k = easeInOut(t);
+        let hop = Math.sin(k * Math.PI) * 4;
+        card.bounds.x = lerp(x0, x1, k);
+        card.bounds.y = lerp(y0, y1, k) - hop;
+      },
+      done: () => {
+        card.interactive = true;
+        card.visible = true;
+      },
     });
-
-    card.interactive = true;
   }
 }
 
@@ -88,10 +93,11 @@ export class DiscardCard extends Action {
   perform() {
     let { board } = this.game;
 
-    board.removeCard(this.card);
     board.removeCardFromHand(this.card);
-    board.discardPile.addToBottom(this.card);
+    board.discardPile.addToTop(this.card);
+
     this.animate();
+
     return Action.done;
   }
 
@@ -99,21 +105,28 @@ export class DiscardCard extends Action {
    * @private
    */
   async animate() {
-    let x0 = this.card.bounds.x;
-    let y0 = this.card.bounds.y;
+    let { card } = this;
+    let x0 = card.bounds.x;
+    let y0 = card.bounds.y;
     let x1 = UI.DISCARD_PILE.x;
     let y1 = UI.DISCARD_PILE.y;
 
-    this.card.interactive = false;
+    card.visible = true;
+    card.interactive = false;
 
-    await Timer.promise(200, (t) => {
-      let k = easeInOut(t);
-      let hop = Math.sin(k * Math.PI) * 4;
-      this.card.bounds.x = lerp(x0, x1, k);
-      this.card.bounds.y = lerp(y0, y1, k) - hop;
+    card.animate({
+      duration: 200,
+      update: (t) => {
+        let k = easeInOut(t);
+        let hop = Math.sin(k * Math.PI) * 4;
+        card.bounds.x = lerp(x0, x1, k);
+        card.bounds.y = lerp(y0, y1, k) - hop;
+      },
+      done: () => {
+        card.visible = false;
+        card.interactive = false;
+      },
     });
-
-    this.card.visible = false;
   }
 }
 
@@ -167,6 +180,13 @@ export class ShuffleDiscardIntoDraw extends Action {
     board.discardPile.shuffle();
     board.drawPile.addToBottom(...board.discardPile);
     board.discardPile.reset();
+
+    for (let card of board.drawPile) {
+      card.visible = false;
+      card.interactive = false;
+      card.bounds.x = UI.DRAW_PILE.x;
+      card.bounds.y = UI.DRAW_PILE.y;
+    }
 
     return Action.done;
   }
@@ -239,7 +259,7 @@ export class MoveToGravePile extends Action {
   /**
    * @private
    */
-  async animate() {
+  animate() {
     let { card } = this;
     let x0 = this.card.bounds.x;
     let y0 = this.card.bounds.y;
@@ -248,12 +268,16 @@ export class MoveToGravePile extends Action {
 
     card.interactive = false;
 
-    await Timer.promise(300, (t) => {
-      card.bounds.x = lerp(x0, x1, t);
-      card.bounds.y = lerp(y0, y1, t);
+    card.animate({
+      duration: 300,
+      update: (t) => {
+        card.bounds.x = lerp(x0, x1, t);
+        card.bounds.y = lerp(y0, y1, t);
+      },
+      done: () => {
+        card.visible = false;
+      },
     });
-
-    card.visible = false;
   }
 }
 
@@ -304,7 +328,7 @@ export class MoveCard extends Action {
     let dx = gridToPixel(this.card.tile.x - this.tile.x);
     let dy = gridToPixel(this.card.tile.y - this.tile.y);
 
-    Timer.global({
+    this.card.animate({
       duration: 100,
       update: (t) => {
         this.card.offsetX = lerp(dx, 0, t);
@@ -317,7 +341,7 @@ export class MoveCard extends Action {
     let dx = gridToPixel(this.tile.x - this.card.tile.x);
     let dy = gridToPixel(this.tile.y - this.card.tile.y);
 
-    Timer.global({
+    this.card.animate({
       duration: 100,
       update: (t) => {
         let k = Math.sin(t * Math.PI) * 0.1;
@@ -362,14 +386,16 @@ export class ReturnCardToDrawPile extends Action {
 
     this.card.interactive = false;
 
-    await Timer.promise(300, (t) => {
-      this.card.bounds.x = lerp(x0, x1, t);
-      this.card.bounds.y = lerp(y0, y1, t);
+    this.card.animate({
+      duration: 300,
+      update: (t) => {
+        this.card.bounds.x = lerp(x0, x1, t);
+        this.card.bounds.y = lerp(y0, y1, t);
+      },
+      done: () => {
+        this.card.visible = false;
+      },
     });
-
-    this.card.visible = false;
-    // TODO: Figure out why this is necessary.
-    UI.needsRender = true;
   }
 }
 
@@ -418,15 +444,19 @@ export class CreateCardInHand extends Action {
     let x1 = UI.HAND.x + gridToPixel(index);
     let y1 = UI.HAND.y;
 
-    this.card.interactive = false;
-    this.card.visible = true;
+    card.interactive = false;
+    card.visible = true;
 
-    await Timer.promise(300, (t) => {
-      this.card.bounds.x = lerp(x0, x1, t);
-      this.card.bounds.y = lerp(y0, y1, t);
+    card.animate({
+      duration: 300,
+      update: (t) => {
+        card.bounds.x = lerp(x0, x1, t);
+        card.bounds.y = lerp(y0, y1, t);
+      },
+      done: () => {
+        card.interactive = true;
+      },
     });
-
-    this.card.interactive = true;
   }
 
   async animateToDrawPile() {
@@ -437,17 +467,18 @@ export class CreateCardInHand extends Action {
     let x1 = UI.DRAW_PILE.x;
     let y1 = UI.DRAW_PILE.y;
 
-    this.card.interactive = false;
-    this.card.visible = true;
+    card.interactive = false;
+    card.visible = true;
 
-    await Timer.promise(300, (t) => {
-      this.card.bounds.x = lerp(x0, x1, t);
-      this.card.bounds.y = lerp(y0, y1, t);
+    card.animate({
+      duration: 300,
+      update: (t) => {
+        card.bounds.x = lerp(x0, x1, t);
+        card.bounds.y = lerp(y0, y1, t);
+      },
+      done: () => {
+        card.visible = false;
+      },
     });
-
-    this.card.visible = false;
-
-    // TODO: Figure out why this is necessary.
-    UI.needsRender = true;
   }
 }

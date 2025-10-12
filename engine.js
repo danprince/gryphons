@@ -407,6 +407,7 @@ export class Timer {
     let timer = new Timer(config);
     timer.update(0);
     this.timers.push(timer);
+    return timer;
   }
 
   /**
@@ -438,6 +439,15 @@ export class Timer {
     if (this.elapsed >= this.duration) {
       this.doneCallback?.();
     }
+  }
+
+  isDone() {
+    return this.elapsed >= this.duration;
+  }
+
+  cancel() {
+    this.elapsed = this.duration;
+    this.doneCallback?.();
   }
 }
 
