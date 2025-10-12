@@ -51,7 +51,7 @@ export const Colors = {
  * @param {number} h
  * @returns {Rectangle}
  */
-function GRID_RECT(x, y, w, h) {
+export function GRID_RECT(x, y, w, h) {
   return new Rectangle(
     gridToPixel(x),
     gridToPixel(y),
@@ -69,9 +69,10 @@ export const UI = {
   RIGHT_TRAY: GRID_RECT(13, 9, 4, 1),
   BOARD: GRID_RECT(5, 2, 7, 6),
   HAND: GRID_RECT(6, 9, 5, 1),
-  DRAW_PILE: GRID_RECT(14, 9, 4, 1),
-  DISCARD_PILE: GRID_RECT(15, 9, 4, 1),
-  GRAVE_PILE: GRID_RECT(16, 9, 4, 1),
+  DRAW_PILE: GRID_RECT(5, 9, 1, 1),
+  DISCARD_PILE: GRID_RECT(11, 9, 1, 1),
+  GRAVE_PILE: GRID_RECT(12, 9, 1, 1),
+  END_TURN_BUTTON: GRID_RECT(8, 10, 2, 1),
 
   /**
    * Track whether the UI needs to refresh during the next frame.

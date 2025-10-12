@@ -406,29 +406,11 @@ export class BoardScreen extends GameScreen {
     bannerSprite: Sprites.banner_neutral,
   });
 
-  endTurnButton = new TileButton({
-    sprite: Sprites.button_end_turn,
+  endTurnButton = new SpriteButton({
+    sprite: Sprites.button_end_turn_2,
+    hoverSprite: Sprites.button_end_turn_2_hover,
+    activeSprite: Sprites.button_end_turn_2_active,
     onClick: () => this.game.endTurn(),
-  });
-
-  endHuntButton = new TileButton({
-    sprite: Sprites.button_end_hunt,
-    onClick: () => {},
-  });
-
-  drawPileButton = new TileButton({
-    sprite: Sprites.button_draw,
-    getCounter: () => this.game.board.drawPile.size,
-  });
-
-  discardPileButton = new TileButton({
-    sprite: Sprites.button_discard,
-    getCounter: () => this.game.board.discardPile.size,
-  });
-
-  gravePileButton = new TileButton({
-    sprite: Sprites.button_graveyard,
-    getCounter: () => this.game.board.gravePile.size,
   });
 
   handPanel = new Panel({
@@ -450,15 +432,8 @@ export class BoardScreen extends GameScreen {
   constructor(game) {
     super(game);
 
-    alignToRow(
-      UI.RIGHT_TRAY,
-      this.endTurnButton,
-      this.drawPileButton,
-      this.discardPileButton,
-      this.gravePileButton,
-    );
-
-    this.endHuntButton.bounds = this.endTurnButton.bounds;
+    this.endTurnButton.bounds.x = UI.END_TURN_BUTTON.x - 6;
+    this.endTurnButton.bounds.y = UI.END_TURN_BUTTON.y + 4;
   }
 
   enter() {
@@ -478,9 +453,6 @@ export class BoardScreen extends GameScreen {
     this.deckButton.update();
 
     this.endTurnButton.update();
-    this.drawPileButton.update();
-    this.discardPileButton.update();
-    this.gravePileButton.update();
 
     this.updateHandHover();
     this.updateDraggingCard();
@@ -552,15 +524,65 @@ export class BoardScreen extends GameScreen {
 
     drawFrame(Sprites.panel, UI.RIGHT_PANEL);
     UI.cardInfo?.render(UI.RIGHT_PANEL);
-    this.endTurnButton.render();
-    this.drawPileButton.render();
-    this.discardPileButton.render();
-    this.gravePileButton.render();
 
     drawFrame(Sprites.panel_worn, UI.CENTER_PANEL);
     this.renderBoard();
-    this.renderPileCards();
+
+    this.renderPiles();
     this.renderHand();
+    this.endTurnButton.render();
+    this.renderPileCards();
+  }
+
+  renderPiles() {
+    drawFrame(Sprites.panel_pile, UI.DRAW_PILE);
+    this.renderCardStack(
+      Sprites.stack_draw,
+      UI.DRAW_PILE,
+      this.game.board.drawPile.size,
+    );
+
+    drawFrame(Sprites.panel_pile, UI.DISCARD_PILE);
+    this.renderCardStack(
+      Sprites.stack_discard,
+      UI.DISCARD_PILE,
+      this.game.board.discardPile.size,
+    );
+
+    if (this.game.board.gravePile.size > 0) {
+      drawFrame(Sprites.panel, UI.GRAVE_PILE);
+      this.renderCardStack(
+        Sprites.stack_grave,
+        UI.GRAVE_PILE,
+        this.game.board.gravePile.size,
+      );
+    }
+  }
+
+  /**
+   * @param {Sprite} sprite
+   * @param {Rectangle} bounds
+   * @param {number} size
+   */
+  renderCardStack(sprite, bounds, size) {
+    let gap = 2;
+    let maxStackSize = 5;
+    let cardsPerSlice = 5;
+    let stackSize = Math.min(Math.ceil(size / cardsPerSlice), maxStackSize);
+
+    if (stackSize === 0) {
+      drawSprite(Sprites.stack_empty, bounds.x, bounds.y);
+    }
+
+    for (let i = 0; i < stackSize; i++) {
+      drawSprite(sprite, bounds.x, bounds.y - i * gap);
+    }
+
+    TextStyle.save();
+    TextStyle.align = "center";
+    TextStyle.baseline = "middle";
+    writeLine(`${size}`, bounds.center.x, bounds.y + bounds.h);
+    TextStyle.restore();
   }
 
   /**
