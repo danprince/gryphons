@@ -722,13 +722,6 @@ export class Card {
     ctx.globalAlpha = this.opacity;
     drawSprite(this.type.sprite, x, y);
 
-    //if (this.hasBounty) {
-    //  let sprite = Sprites.icon_gold;
-    //  let sx = x + this.bounds.w - sprite.width;
-    //  let sy = y;
-    //  drawSprite(sprite, sx, sy);
-    //}
-
     if (this.counter > 0) {
       let sprite = this.type.category.counterFrameSprite;
       let sx = x - 1;
@@ -748,13 +741,6 @@ export class Card {
     }
 
     ctx.globalAlpha = 1;
-
-    if (UI.debug) {
-      ctx.save();
-      ctx.strokeStyle = "cyan";
-      ctx.strokeRect(x + 0.5, y + 0.5, this.bounds.w - 1, this.bounds.h - 1);
-      ctx.restore();
-    }
   }
 
   /**
