@@ -230,6 +230,31 @@ export const StonyGryphon = new CardType({
   },
 });
 
+export const Chest = new CardType({
+  category: Monster,
+  sprite: Sprites.card_chest,
+  name: "Chest",
+  description: "What's inside?",
+  counter: 9,
+  effects: [],
+  onDeath(game, card) {
+    game.gold += randomItem([5, 10, 20, 30, 100]);
+    game.board.addActionsBottom(
+      new DestroyCard(card),
+      new PlayCard(new Card(ChestOpen), card.tile),
+    );
+  },
+});
+
+export const ChestOpen = new CardType({
+  category: Neutral,
+  sprite: Sprites.card_chest_open,
+  name: "Chest",
+  description: "Riches galore!",
+  counter: 0,
+  effects: [],
+});
+
 export const Hunter = new CardType({
   category: Human,
   sprite: Sprites.card_hunter,

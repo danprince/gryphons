@@ -27,6 +27,8 @@
  */
 
 export const $url = "./sprites.png";
+export const card_chest_open = { y: 120, url: $url, height: 24, width: 24, x: 144, };
+export const card_chest = { y: 120, url: $url, height: 24, width: 24, x: 120, };
 export const card_miner = { y: 72, url: $url, height: 24, width: 24, x: 336, };
 export const vfx_magic = { y: 288, url: $url, height: 23, width: 96, x: 120, };
 export const card_commander = { y: 72, url: $url, height: 24, width: 24, x: 312, };
@@ -46,8 +48,6 @@ export const card_dread = { y: 144, url: $url, height: 24, width: 24, x: 168, };
 export const card_terror = { y: 144, url: $url, height: 24, width: 24, x: 144, };
 export const card_fear = { y: 144, url: $url, height: 24, width: 24, x: 120, };
 export const card_bomb = { y: 120, url: $url, height: 24, width: 24, x: 168, };
-export const card_key = { y: 120, url: $url, height: 24, width: 24, x: 144, };
-export const card_chest = { y: 120, url: $url, height: 24, width: 24, x: 120, };
 export const card_stone_gryphon = { y: 96, url: $url, height: 24, width: 24, x: 216, };
 export const card_proud_gryphon = { y: 96, url: $url, height: 24, width: 24, x: 192, };
 export const card_mean_gryphon = { y: 96, url: $url, height: 24, width: 24, x: 168, };
