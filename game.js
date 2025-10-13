@@ -676,6 +676,17 @@ export class Card {
     this.counter = type.counter;
   }
 
+  /**
+   * Create a copy of this card.
+   * @returns {Card}
+   */
+  copy() {
+    let copy = new Card(this.type);
+    copy.effects = [...this.effects];
+    copy.counter = this.counter;
+    return copy;
+  }
+
   isHovered() {
     return (
       this.interactive &&
