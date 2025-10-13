@@ -449,3 +449,45 @@ export function easeInOut(t) {
 export function easeOutBack(t) {
   return --t * t * ((1.70158 + 1) * t + 1.70158) + 1;
 }
+
+/**
+ * @template T
+ * @param {T[]} array
+ * @param {(item: T) => number} getScore
+ * @returns {T | undefined}
+ */
+export function findMaxBy(array, getScore) {
+  let maxScore = -Infinity;
+  let maxItem = array[0];
+
+  for (let item of array) {
+    let score = getScore(item);
+    if (score >= maxScore) {
+      maxItem = item;
+      maxScore = score;
+    }
+  }
+
+  return maxItem;
+}
+
+/**
+ * @template T
+ * @param {T[]} array
+ * @param {(item: T) => number} getScore
+ * @returns {T | undefined}
+ */
+export function findMinBy(array, getScore) {
+  let minScore = Infinity;
+  let minItem = array[0];
+
+  for (let item of array) {
+    let score = getScore(item);
+    if (score <= minScore) {
+      minItem = item;
+      minScore = score;
+    }
+  }
+
+  return minItem;
+}
