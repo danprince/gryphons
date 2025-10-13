@@ -160,16 +160,17 @@ export const ProudGryphon = new CardType({
   category: Monster,
   sprite: Sprites.card_proud_gryphon,
   name: "Proud Gryphon",
-  description: "Strikes the strongest adjacent hunter",
+  description: "Attacks the strongest adjacent hunters",
   counter: 5,
   onTurn(game, card) {
     let enemies = game.board
       .getAdjacentCards(card)
       .filter((card) => card.type.category === Human);
 
-    let target = findMaxBy(enemies, (enemy) => enemy.counter);
+    let minCounter = Math.max(...enemies.map((card) => card.counter));
+    let targets = enemies.filter((enemy) => enemy.counter === minCounter);
 
-    if (target) {
+    for (let target of targets) {
       game.board.addActionsBottom(
         new Damage({
           card: target,
@@ -185,16 +186,17 @@ export const MeanGryphon = new CardType({
   category: Monster,
   sprite: Sprites.card_mean_gryphon,
   name: "Mean Gryphon",
-  description: "Strikes the weakest adjacent hunter",
+  description: "Attacks the weakest adjacent hunters",
   counter: 5,
   onTurn(game, card) {
     let enemies = game.board
       .getAdjacentCards(card)
       .filter((card) => card.type.category === Human);
 
-    let target = findMinBy(enemies, (enemy) => enemy.counter);
+    let minCounter = Math.min(...enemies.map((card) => card.counter));
+    let targets = enemies.filter((enemy) => enemy.counter === minCounter);
 
-    if (target) {
+    for (let target of targets) {
       game.board.addActionsBottom(
         new Damage({
           card: target,
