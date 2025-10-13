@@ -65,4 +65,6 @@ for (let i = 0; i < 10; i++) {
   }
 }
 
+game.startRound();
+
 UI.init(new BoardScreen(game));

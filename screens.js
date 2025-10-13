@@ -311,11 +311,6 @@ export class BoardScreen extends GameScreen {
     this.endTurnButton.bounds.y = UI.END_TURN_BUTTON.y + 4;
   }
 
-  enter() {
-    super.enter();
-    this.game.startRound();
-  }
-
   /**
    * @param {number} dt
    */
