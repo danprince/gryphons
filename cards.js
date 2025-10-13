@@ -15,12 +15,11 @@ import {
   CardCategory,
   CardEffect,
   CardType,
-  Game,
   getConnectedCards,
 } from "./game.js";
 import * as Sprites from "./sprites.js";
 import { VFX } from "./ui.js";
-import { findMaxBy, findMinBy, randomItem, required } from "./utils.js";
+import { randomItem } from "./utils.js";
 
 export const Human = new CardCategory({
   name: "Hunter",
@@ -439,6 +438,35 @@ export const Miner = new CardType({
       if (neighbour.type === Rocks || neighbour.type === Bones) {
         game.board.addActionsBottom(new MoveToGravePile(neighbour));
       }
+    }
+  },
+});
+
+export const GhostlyGryphon = new CardType({
+  category: Neutral,
+  sprite: Sprites.card_ghostly_gryphon,
+  name: "Ghostly Gryphon",
+  description: "Woo!",
+  counter: 0,
+  onTurn(game, card) {
+    // Turn all neighbours into bones
+    for (let neighbour of game.board.getAdjacentCards(card)) {
+      if (neighbour.type.category === Human) {
+        let bones = new Card(Bones);
+        game.board.addActionsBottom(
+          new MoveToGravePile(neighbour),
+          new PlayCard(bones, neighbour.tile),
+        );
+      }
+    }
+
+    // Then move to an adjacent empty tile
+    let tiles = game.board.getAdjacentTiles(card.tile);
+    let emptyTiles = tiles.filter((tile) => tile.isEmpty());
+    let emptyTile = randomItem(emptyTiles);
+
+    if (emptyTile) {
+      game.board.addActionsBottom(new MoveCard(card, emptyTile));
     }
   },
 });

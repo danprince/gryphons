@@ -27,6 +27,7 @@
  */
 
 export const $url = "./sprites.png";
+export const card_ghostly_gryphon = { y: 96, url: $url, height: 24, width: 24, x: 264, };
 export const card_chest_open = { y: 120, url: $url, height: 24, width: 24, x: 144, };
 export const card_chest = { y: 120, url: $url, height: 24, width: 24, x: 120, };
 export const card_miner = { y: 72, url: $url, height: 24, width: 24, x: 336, };
