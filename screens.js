@@ -568,6 +568,8 @@ export class CardPileScreen extends Screen {
     this.title = config.title;
     this.description = config.description;
     this.previousScreen = config.previousScreen;
+    this.columns = pixelToGrid(this.CARD_AREA.w);
+    this.rows = pixelToGrid(this.CARD_AREA.h);
   }
 
   enter() {
@@ -575,12 +577,10 @@ export class CardPileScreen extends Screen {
     // visibility without messing up the board's game state.
     this.cards = [...this.pile].map((card) => card.copy());
 
-    let cardsPerRow = pixelToGrid(this.CARD_AREA.w);
-
     for (let i = 0; i < this.cards.length; i++) {
       let card = required(this.cards[i]);
-      let x = i % cardsPerRow;
-      let y = Math.floor(i / cardsPerRow);
+      let x = i % this.columns;
+      let y = Math.floor(i / this.columns);
       card.bounds.x = this.CARD_AREA.x + gridToPixel(x);
       card.bounds.y = this.CARD_AREA.y + gridToPixel(y);
     }
@@ -598,11 +598,21 @@ export class CardPileScreen extends Screen {
   }
 
   render() {
-    drawFrame(Sprites.panel, UI.CENTER_PANEL);
+    drawFrame(Sprites.panel_table, this.CARD_AREA.clone().grow(3));
 
     if (UI.cardInfo) {
       drawFrame(Sprites.panel, UI.RIGHT_PANEL);
       UI.cardInfo.render(UI.RIGHT_PANEL);
+    }
+
+    for (let y = 0; y < this.rows; y++) {
+      for (let x = 0; x < this.columns; x++) {
+        drawSprite(
+          Sprites.tile_empty,
+          this.CARD_AREA.x + gridToPixel(x),
+          this.CARD_AREA.y + gridToPixel(y),
+        );
+      }
     }
 
     for (let card of this.cards) {
