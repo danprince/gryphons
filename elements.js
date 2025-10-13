@@ -175,7 +175,6 @@ export class TextButtonStyle {
 }
 
 export class TextButton extends Button {
-  bounds = new Rectangle();
   label = "";
   padding = 5;
 
@@ -189,7 +188,8 @@ export class TextButton extends Button {
    * @param {() => void} config.onClick
    */
   constructor(config) {
-    super({ ...config, bounds: new Rectangle(config.x ?? 0, config.y ?? 0) });
+    let bounds = new Rectangle(config.x ?? 0, config.y ?? 0, 0, 0);
+    super({ ...config, bounds, });
     this.style = config.style ?? TextButtonStyle.default;
     this.label = config.label;
     this.padding = config.padding ?? this.padding;
