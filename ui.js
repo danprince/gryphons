@@ -77,6 +77,7 @@ export const UI = {
   DISCARD_PILE: GRID_RECT(11, 9, 1, 1),
   GRAVE_PILE: GRID_RECT(12, 9, 1, 1),
   END_TURN_BUTTON: GRID_RECT(8, 10, 2, 1),
+  BACK_BUTTON: GRID_RECT(8, 10, 2, 1),
 
   /**
    * Track whether the UI needs to refresh during the next frame.

@@ -8,9 +8,10 @@ import {
   writeLine,
   gridToPixel,
   Timer,
+  pixelToGrid,
 } from "./engine.js";
 import { UI, GameInfo, Screen, alignToRow, drawFrame } from "./ui.js";
-import { Rectangle, lerp } from "./utils.js";
+import { Rectangle, lerp, required } from "./utils.js";
 import * as Sprites from "./sprites.js";
 import {
   CardStackButton,
@@ -21,7 +22,7 @@ import {
 } from "./elements.js";
 
 /**
- * @import { Card, Game } from "./game.js";
+ * @import { Card, Game, Pile } from "./game.js";
  * @import { Sprite } from "./sprites.js";
  */
 
@@ -225,24 +226,60 @@ export class GameScreen extends Screen {
   deckButton = new CounterButton({
     sprite: Sprites.button_deck,
     getCounter: () => this.game.deck.size,
+    onClick: () =>
+      UI.navigate(
+        new CardPileScreen({
+          pile: this.game.deck,
+          title: "Deck",
+          description: "These are the cards in your deck",
+          previousScreen: this,
+        }),
+      ),
   });
 
   drawStackButton = new CardStackButton({
     label: "Draw",
     cardBackSprite: Sprites.stack_draw,
     bounds: UI.DRAW_PILE,
+    onClick: () =>
+      UI.navigate(
+        new CardPileScreen({
+          pile: this.game.board.drawPile,
+          title: "Draw",
+          description: "These are the cards in your draw pile",
+          previousScreen: this,
+        }),
+      ),
   });
 
   discardStackButton = new CardStackButton({
     label: "Disc.",
     cardBackSprite: Sprites.stack_discard,
     bounds: UI.DISCARD_PILE,
+    onClick: () =>
+      UI.navigate(
+        new CardPileScreen({
+          pile: this.game.board.discardPile,
+          title: "Discard",
+          description: "These are the cards in your discard pile",
+          previousScreen: this,
+        }),
+      ),
   });
 
   graveStackButton = new CardStackButton({
     label: "Grave",
     cardBackSprite: Sprites.stack_grave,
     bounds: UI.GRAVE_PILE,
+    onClick: () =>
+      UI.navigate(
+        new CardPileScreen({
+          pile: this.game.board.gravePile,
+          title: "Grave",
+          description: "These are the cards in your grave pile",
+          previousScreen: this,
+        }),
+      ),
   });
 
   /**
@@ -493,5 +530,85 @@ export class BoardScreen extends GameScreen {
     for (let card of this.game.board.hand) {
       card?.render();
     }
+  }
+}
+
+export class CardPileScreen extends Screen {
+  /**
+   * @type {Card[]}
+   */
+  cards = [];
+
+  /**
+   * @private
+   * @type {Rectangle}
+   */
+  CARD_AREA = UI.CENTER_PANEL.clone().grow(-gridToPixel(1));
+
+  /**
+   * @private
+   */
+  backButton = new TextButton({
+    label: "BACK",
+    x: UI.BACK_BUTTON.x,
+    y: UI.BACK_BUTTON.y,
+    onClick: () => UI.navigate(this.previousScreen),
+  });
+
+  /**
+   * @param {object} config
+   * @param {Pile} config.pile
+   * @param {string} config.title
+   * @param {string} config.description
+   * @param {Screen} config.previousScreen
+   */
+  constructor(config) {
+    super();
+    this.pile = config.pile;
+    this.title = config.title;
+    this.description = config.description;
+    this.previousScreen = config.previousScreen;
+  }
+
+  enter() {
+    // Copy the cards from the pile so that we can set with their bounds and
+    // visibility without messing up the board's game state.
+    this.cards = [...this.pile].map((card) => card.copy());
+
+    let cardsPerRow = pixelToGrid(this.CARD_AREA.w);
+
+    for (let i = 0; i < this.cards.length; i++) {
+      let card = required(this.cards[i]);
+      let x = i % cardsPerRow;
+      let y = Math.floor(i / cardsPerRow);
+      card.bounds.x = this.CARD_AREA.x + gridToPixel(x);
+      card.bounds.y = this.CARD_AREA.y + gridToPixel(y);
+    }
+  }
+
+  /**
+   * @param {number} dt
+   */
+  update(dt) {
+    this.backButton.update();
+
+    for (let card of this.cards) {
+      card.update(dt);
+    }
+  }
+
+  render() {
+    drawFrame(Sprites.panel, UI.CENTER_PANEL);
+
+    if (UI.cardInfo) {
+      drawFrame(Sprites.panel, UI.RIGHT_PANEL);
+      UI.cardInfo.render(UI.RIGHT_PANEL);
+    }
+
+    for (let card of this.cards) {
+      card.render();
+    }
+
+    this.backButton.render();
   }
 }
