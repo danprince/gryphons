@@ -559,14 +559,14 @@ export class CardInfo {
 
     TextStyle.align = "center";
     y += writeLine(card.type.name, bounds.center.x, y);
-    y += gap;
 
     if (card.type.category.name) {
       TextStyle.align = "center";
       TextStyle.color = Colors.eiffel;
       y += writeLine(card.type.category.name, bounds.center.x, y);
-      y += gap;
     }
+
+    y += gap;
 
     if (card.type.description) {
       TextStyle.align = "left";
