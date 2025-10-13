@@ -548,6 +548,8 @@ export class CardInfo {
     let { x, y, w } = bounds.clone().grow(-5);
     let gap = 5;
 
+    TextStyle.save();
+
     drawSprite(Sprites.banner_monster, bounds.x, bounds.y);
     y += gap;
 
@@ -555,34 +557,37 @@ export class CardInfo {
     drawSprite(sprite, bounds.center.x - sprite.width / 2, y);
     y += sprite.height + gap;
 
-    TextStyle.save();
     TextStyle.align = "center";
     y += writeLine(card.type.name, bounds.center.x, y);
     y += gap;
-    TextStyle.restore();
+
+    if (card.type.category.name) {
+      TextStyle.align = "center";
+      TextStyle.color = Colors.eiffel;
+      y += writeLine(card.type.category.name, bounds.center.x, y);
+      y += gap;
+    }
 
     if (card.type.description) {
-      TextStyle.save();
       TextStyle.align = "left";
       TextStyle.color = Colors.eiffel;
       y += writeText(card.type.description, x, y, w);
       y += gap;
-      TextStyle.restore();
     }
 
     y += gap;
 
     for (let effect of card.effects) {
       drawSprite(effect.icon, x, y);
-      TextStyle.save();
       TextStyle.align = "left";
       TextStyle.color = Colors.white;
       y += writeLine(effect.name, x + 10, y + 1) + 2;
       TextStyle.color = Colors.eiffel;
       y += writeText(effect.description, x + 10, y, w - 10);
       y += gap;
-      TextStyle.restore();
     }
+
+    TextStyle.restore();
   }
 }
 

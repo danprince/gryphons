@@ -574,9 +574,11 @@ export class CardCategory {
   /**
    *
    * @param {object} config
+   * @param {string} config.name
    * @param {Sprite} config.counterFrameSprite
    */
   constructor(config) {
+    this.name = config.name;
     this.counterFrameSprite = config.counterFrameSprite;
   }
 }

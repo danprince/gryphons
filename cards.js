@@ -22,14 +22,17 @@ import { VFX } from "./ui.js";
 import { randomItem, required } from "./utils.js";
 
 export const Human = new CardCategory({
+  name: "Hunter",
   counterFrameSprite: Sprites.counter_frame_human,
 });
 
 export const Monster = new CardCategory({
+  name: "Monster",
   counterFrameSprite: Sprites.counter_frame_monster,
 });
 
 export const Neutral = new CardCategory({
+  name: "",
   counterFrameSprite: Sprites.counter_frame_neutral,
 });
 
