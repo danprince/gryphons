@@ -8,6 +8,7 @@ import {
   CreateCardInHand,
   DestroyCard,
   Delay,
+  MoveToGravePile,
 } from "./actions.js";
 import {
   Card,
@@ -19,7 +20,7 @@ import {
 } from "./game.js";
 import * as Sprites from "./sprites.js";
 import { VFX } from "./ui.js";
-import { randomItem, required } from "./utils.js";
+import { findMaxBy, findMinBy, randomItem, required } from "./utils.js";
 
 export const Human = new CardCategory({
   name: "Hunter",
@@ -153,6 +154,80 @@ export const RestlessGryphon = new CardType({
   name: "Restless Gryphon",
   counter: 3,
   effects: [Flying, Aggressive],
+});
+
+export const ProudGryphon = new CardType({
+  category: Monster,
+  sprite: Sprites.card_proud_gryphon,
+  name: "Proud Gryphon",
+  description: "Strikes the strongest adjacent hunter",
+  counter: 5,
+  onTurn(game, card) {
+    let enemies = game.board
+      .getAdjacentCards(card)
+      .filter((card) => card.type.category === Human);
+
+    let target = findMaxBy(enemies, (enemy) => enemy.counter);
+
+    if (target) {
+      game.board.addActionsBottom(
+        new Damage({
+          card: target,
+          amount: 1,
+          vfx: VFX.claw,
+        }),
+      );
+    }
+  },
+});
+
+export const MeanGryphon = new CardType({
+  category: Monster,
+  sprite: Sprites.card_mean_gryphon,
+  name: "Mean Gryphon",
+  description: "Strikes the weakest adjacent hunter",
+  counter: 5,
+  onTurn(game, card) {
+    let enemies = game.board
+      .getAdjacentCards(card)
+      .filter((card) => card.type.category === Human);
+
+    let target = findMinBy(enemies, (enemy) => enemy.counter);
+
+    if (target) {
+      game.board.addActionsBottom(
+        new Damage({
+          card: target,
+          amount: 1,
+          vfx: VFX.claw,
+        }),
+      );
+    }
+  },
+});
+
+export const StonyGryphon = new CardType({
+  category: Monster,
+  sprite: Sprites.card_stone_gryphon,
+  name: "Stony Gryphon",
+  description: "Turns one adjacent human into a rock",
+  counter: 3,
+  onTurn(game, card) {
+    let hunters = game.board
+      .getAdjacentCards(card)
+      .filter((card) => card.type.category === Human);
+
+    let hunter = randomItem(hunters);
+
+    if (hunter) {
+      let rock = new Card(Rocks);
+
+      game.board.addActionsBottom(
+        new DestroyCard(hunter),
+        new PlayCard(rock, hunter.tile),
+      );
+    }
+  },
 });
 
 export const Hunter = new CardType({
@@ -293,6 +368,7 @@ export const Commander = new CardType({
   name: "Commander",
   description: "Return connected cards to the draw pile",
   counter: 1,
+  effects: [Remains],
   onPlay(game, card) {
     for (let friend of getConnectedCards(game, card)) {
       game.board.addActionsBottom(
@@ -309,6 +385,7 @@ export const Wizard = new CardType({
   name: "Wizard",
   description: "Deal damage to all connected enemies.",
   counter: 1,
+  effects: [Remains],
   onPlay(game, card) {
     for (let enemy of getConnectedCards(game, card, Monster)) {
       game.board.addActionsBottom(
@@ -319,6 +396,22 @@ export const Wizard = new CardType({
         }),
         new Delay(50),
       );
+    }
+  },
+});
+
+export const Miner = new CardType({
+  category: Human,
+  sprite: Sprites.card_miner,
+  name: "Miner",
+  description: "Destroys any touching rocks and bones",
+  counter: 1,
+  effects: [AttackOneRandomMonster, Remains],
+  onPlay(game, card) {
+    for (let neighbour of game.board.getAdjacentCards(card)) {
+      if (neighbour.type === Rocks || neighbour.type === Bones) {
+        game.board.addActionsBottom(new MoveToGravePile(neighbour));
+      }
     }
   },
 });

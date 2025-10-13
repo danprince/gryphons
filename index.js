@@ -5,15 +5,19 @@ import {
   Cleric,
   Commander,
   Gladiator,
+  MeanGryphon,
   Gryphon,
   Hero,
   Hunter,
   Knight,
   Lich,
+  Miner,
+  ProudGryphon,
   RestlessGryphon,
   Rocks,
   Wizard,
   YoungGryphon,
+  StonyGryphon,
 } from "./cards.js";
 import { Card, Game } from "./game.js";
 import { BoardScreen, MenuScreen } from "./screens.js";
@@ -32,6 +36,7 @@ for (let i = 0; i < 20; i++) {
     Gladiator,
     Commander,
     Wizard,
+    Miner,
   ]);
   let card = new Card(type);
   game.deck.addToTop(card);
@@ -44,6 +49,9 @@ for (let i = 0; i < 10; i++) {
     RestlessGryphon,
     Gryphon,
     YoungGryphon,
+    MeanGryphon,
+    ProudGryphon,
+    StonyGryphon,
     Rocks,
     Bones,
   ]);

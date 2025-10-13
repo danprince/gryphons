@@ -27,6 +27,7 @@
  */
 
 export const $url = "./sprites.png";
+export const card_miner = { y: 72, url: $url, height: 24, width: 24, x: 336, };
 export const vfx_magic = { y: 288, url: $url, height: 23, width: 96, x: 120, };
 export const card_commander = { y: 72, url: $url, height: 24, width: 24, x: 312, };
 export const button_active = { y: 72, url: $url, height: 10, width: 7, center: { y: 4, width: 1, height: 2, x: 3, }, x: 7, };
@@ -47,11 +48,9 @@ export const card_fear = { y: 144, url: $url, height: 24, width: 24, x: 120, };
 export const card_bomb = { y: 120, url: $url, height: 24, width: 24, x: 168, };
 export const card_key = { y: 120, url: $url, height: 24, width: 24, x: 144, };
 export const card_chest = { y: 120, url: $url, height: 24, width: 24, x: 120, };
-export const card_skeletal_gryphon = { y: 96, url: $url, height: 24, width: 24, x: 240, };
-export const card_king_gryphon = { y: 96, url: $url, height: 24, width: 24, x: 216, };
-export const card_furious_gryphon = { y: 96, url: $url, height: 24, width: 24, x: 192, };
-export const card_odd_gryphon = { y: 96, url: $url, height: 24, width: 24, x: 168, };
-export const card_weird_gryphon = { y: 96, url: $url, height: 24, width: 24, x: 264, };
+export const card_stone_gryphon = { y: 96, url: $url, height: 24, width: 24, x: 216, };
+export const card_proud_gryphon = { y: 96, url: $url, height: 24, width: 24, x: 192, };
+export const card_mean_gryphon = { y: 96, url: $url, height: 24, width: 24, x: 168, };
 export const card_gryphon = { y: 96, url: $url, height: 24, width: 24, x: 120, };
 export const card_lich = { y: 72, url: $url, height: 24, width: 24, x: 192, };
 export const card_knight = { y: 72, url: $url, height: 24, width: 24, x: 168, };
@@ -97,7 +96,7 @@ export const icon_heal = { y: 8, url: $url, height: 8, width: 8, x: 64, };
 export const card_wizard = { y: 72, url: $url, height: 24, width: 24, x: 240, };
 export const card_hero = { y: 72, url: $url, height: 24, width: 24, x: 264, };
 export const icon_flying = { y: 8, url: $url, height: 8, width: 8, x: 72, };
-export const card_restless_gryphon = { y: 96, url: $url, height: 24, width: 24, x: 288, };
+export const card_restless_gryphon = { y: 96, url: $url, height: 24, width: 24, x: 240, };
 export const icon_knockback = { y: 8, url: $url, height: 8, width: 8, x: 80, };
 export const card_thrall = { y: 72, url: $url, height: 24, width: 24, x: 216, };
 export const card_gladiator = { y: 72, url: $url, height: 24, width: 24, x: 288, };
