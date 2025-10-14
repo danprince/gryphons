@@ -150,9 +150,11 @@ export class TextButtonStyle {
   static default = new TextButtonStyle({
     sprite: Sprites.button,
     activeSprite: Sprites.button_active,
+    disabledSprite: Sprites.button_disabled,
     labelColor: Colors.sepia,
     hoverLabelColor: Colors.kombucha,
     activeLabelColor: Colors.kombucha,
+    disabledLabelColor: Colors.jet,
   });
 
   /**
@@ -160,17 +162,21 @@ export class TextButtonStyle {
    * @param {NineSliceSprite} config.sprite
    * @param {NineSliceSprite} [config.hoverSprite]
    * @param {NineSliceSprite} [config.activeSprite]
+   * @param {NineSliceSprite} [config.disabledSprite]
    * @param {string} [config.labelColor]
    * @param {string} [config.hoverLabelColor]
    * @param {string} [config.activeLabelColor]
+   * @param {string} [config.disabledLabelColor]
    */
   constructor(config) {
     this.sprite = config.sprite;
     this.hoverSprite = config.hoverSprite;
     this.activeSprite = config.activeSprite;
+    this.disabledSprite = config.disabledSprite;
     this.labelColor = config.labelColor;
     this.hoverLabelColor = config.hoverLabelColor;
     this.activeLabelColor = config.activeLabelColor;
+    this.disabledLabelColor = config.disabledLabelColor;
   }
 }
 
@@ -185,14 +191,16 @@ export class TextButton extends Button {
    * @param {number} [config.x]
    * @param {number} [config.y]
    * @param {number} [config.padding]
+   * @param {boolean} [config.disabled]
    * @param {() => void} config.onClick
    */
   constructor(config) {
     let bounds = new Rectangle(config.x ?? 0, config.y ?? 0, 0, 0);
-    super({ ...config, bounds, });
+    super({ ...config, bounds });
     this.style = config.style ?? TextButtonStyle.default;
     this.label = config.label;
     this.padding = config.padding ?? this.padding;
+    this.update();
   }
 
   update() {
@@ -209,7 +217,9 @@ export class TextButton extends Button {
     let isActive = this.isDown();
     let sprite = style.sprite;
 
-    if (isActive && style.activeSprite) {
+    if (this.disabled && style.disabledSprite) {
+      sprite = style.disabledSprite;
+    } else if (isActive && style.activeSprite) {
       sprite = style.activeSprite;
     } else if (isHovered && style.hoverSprite) {
       sprite = style.hoverSprite;
@@ -217,7 +227,9 @@ export class TextButton extends Button {
 
     TextStyle.save();
 
-    if (isActive && style.activeLabelColor) {
+    if (this.disabled) {
+      TextStyle.color = style.disabledLabelColor;
+    } else if (isActive && style.activeLabelColor) {
       TextStyle.color = style.activeLabelColor;
     } else if (isHovered && style.hoverLabelColor) {
       TextStyle.color = style.hoverLabelColor;
