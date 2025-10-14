@@ -745,3 +745,103 @@ const Debug = {
     ctx.restore();
   },
 };
+
+export class Drag {
+  /**
+   * Whether or not to allow "tap A then tap B" style drag (easier for
+   * trackpads and touch devices).
+   */
+  tapDraggingEnabled = true;
+
+  /**
+   * Whether the user is currently tap dragging.
+   */
+  isTapDragging = true;
+
+  /**
+   * The max delay (in milliseconds) that the pointer can be down for before it
+   * can't be considered to be a tap drag.
+   */
+  tapDraggingMaxDelay = 250;
+
+  /**
+   * The max distance (in pixels) that the pointer can move before it can't be
+   * considered a to be a tap drag.
+   */
+  tapDraggingMaxDistance = 3;
+
+  /**
+   * Whether the drag is currently active.
+   */
+  isActive = false;
+
+  /**
+   * The x coordinate where the drag started.
+   */
+  originX = 0;
+
+  /**
+   * The y coordinate where the drag started.
+   */
+  originY = 0;
+
+  /**
+   * The x distance since the drag started.
+   */
+  deltaX = 0;
+
+  /**
+   * The y distance since the drag started.
+   */
+  deltaY = 0;
+
+  /**
+   * The time (in ms) that the drag started at.
+   */
+  startTime = 0;
+
+  isReleased() {
+    if (this.isTapDragging) {
+      // If this is a tap style drag then the second press ends the drag.
+      return UI.pointer.isPressed();
+    } else {
+      // If this is a regular drag then releasing the pointer ends the drag.
+      return !UI.pointer.isDown();
+    }
+  }
+
+  begin() {
+    assert(!this.isActive);
+    this.isActive = true;
+    this.isTapDragging = false;
+    this.originX = UI.pointer.x;
+    this.originY = UI.pointer.y;
+    this.startTime = Date.now();
+  }
+
+  end() {
+    assert(this.isActive);
+    this.isActive = false;
+  }
+
+  update() {
+    if (!this.isActive) {
+      return;
+    }
+
+    this.deltaX = UI.pointer.x - this.originX;
+    this.deltaY = UI.pointer.y - this.originY;
+
+    if (this.tapDraggingEnabled && this.isReleased()) {
+      let distance = Math.hypot(this.deltaX, this.deltaY);
+      let duration = Date.now() - this.startTime;
+
+      if (
+        duration < this.tapDraggingMaxDelay &&
+        distance < this.tapDraggingMaxDistance
+      ) {
+        this.isTapDragging = true;
+      }
+    }
+  }
+}
