@@ -413,12 +413,13 @@ export class Pile {
    */
   addToTop(...cards) {
     for (let card of cards) {
-      if (!this.set.has(card)) {
-        this.set.add(card);
-        this.cards.push(card);
-      } else {
-        throw new Error("Attempt to add a duplicate card to a pile!");
+      if (this.set.has(card)) {
+        console.warn("Adding duplicate card to top of pile", this, card);
+        removeFromArray(this.cards, card);
       }
+
+      this.set.add(card);
+      this.cards.push(card);
     }
   }
 
@@ -427,12 +428,13 @@ export class Pile {
    */
   addToBottom(...cards) {
     for (let card of cards) {
-      if (!this.set.has(card)) {
-        this.set.add(card);
-        this.cards.unshift(card);
-      } else {
-        throw new Error("Attempt to add a duplicate card to a pile!");
+      if (this.set.has(card)) {
+        console.warn("Adding duplicate card to bottom of pile", this, card);
+        removeFromArray(this.cards, card);
       }
+
+      this.set.add(card);
+      this.cards.unshift(card);
     }
   }
 
