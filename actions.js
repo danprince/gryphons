@@ -308,6 +308,12 @@ export class MoveCard extends Action {
   }
 
   perform() {
+    // Bail if the card was removed from play after the action was created.
+    if (!this.card.isInPlay()) {
+      return Action.done;
+    }
+
+    // Bail if there's now something in the tile.
     if (!this.tile.isEmpty()) {
       this.playBumpAnimation();
       return Action.done;
