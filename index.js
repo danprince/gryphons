@@ -1,5 +1,3 @@
-// @ts-check
-
 import { Game } from "./game.js";
 import { MenuScreen } from "./screens.js";
 import { UI } from "./ui.js";

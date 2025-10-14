@@ -1,5 +1,3 @@
-// @ts-check
-
 import { ctx, drawSprite, TextStyle, Timer, writeLine } from "./engine.js";
 import { Colors, UI } from "./ui.js";
 import {
@@ -193,6 +191,11 @@ export class Board {
    * @type {number}
    */
   height;
+
+  /**
+   * The number of turns that have taken place during this round.
+   */
+  turns = 0;
 
   /**
    * @type {Tile[]}

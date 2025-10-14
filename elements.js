@@ -1,5 +1,3 @@
-// @ts-check
-
 import { ctx, drawSprite, fillRect, TextStyle, writeLine } from "./engine.js";
 import { Colors, drawFrame, UI } from "./ui.js";
 import { assert, Rectangle } from "./utils.js";

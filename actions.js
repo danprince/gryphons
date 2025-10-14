@@ -1,5 +1,3 @@
-// @ts-check
-
 import { gridToPixel } from "./engine.js";
 import { Card, Game, Tile } from "./game.js";
 import { Message, UI, VFX } from "./ui.js";

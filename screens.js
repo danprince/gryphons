@@ -1,5 +1,3 @@
-// @ts-check
-
 import { PlayCard } from "./actions.js";
 import {
   ctx,
