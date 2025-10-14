@@ -159,36 +159,6 @@ export function randomItem(array) {
 }
 
 /**
- * Get the Euclidean distance between two points.
- * @param {Point} a
- * @param {Point} b
- * @returns {number}
- */
-export function getEuclideanDistance(a, b) {
-  return Math.hypot(a.x - b.x, a.y - b.y);
-}
-
-/**
- * Get the taxicab distance between two points.
- * @param {Point} a
- * @param {Point} b
- * @returns {number}
- */
-export function getTaxicabDistance(a, b) {
-  return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
-}
-
-/**
- * Get the Chebyshev distance between two points.
- * @param {Point} a
- * @param {Point} b
- * @returns {number}
- */
-export function getChebyshevDistance(a, b) {
-  return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
-}
-
-/**
  * @param {string} text
  * @param {number} maxCharsPerLine
  * @returns {string[]}
@@ -216,17 +186,6 @@ export function splitText(text, maxCharsPerLine = 30) {
   }
 
   return lines;
-}
-
-/**
- * Push an item to a random index within an array.
- * @template Value
- * @param {Value[]} array
- * @param {Value} item
- */
-export function pushRandom(array, item) {
-  let index = Math.floor(Math.random() * array.length);
-  array.splice(index, 0, item);
 }
 
 export class Rectangle {
@@ -360,15 +319,6 @@ export function loadImage(src) {
 }
 
 /**
- * @param {HTMLImageElement} image
- */
-export function waitForImage(image) {
-  if (!image.complete) {
-    return image.decode();
-  }
-}
-
-/**
  * @type {Map<string, HTMLCanvasElement>}
  */
 let recolorCache = new Map();
@@ -378,7 +328,7 @@ let recolorCache = new Map();
  * @param {string} color
  * @returns {HTMLCanvasElement}
  */
-export function recolor(image, color) {
+function recolor(image, color) {
   let canvas = recolorCache.get(color);
 
   if (!canvas) {
