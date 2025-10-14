@@ -1,11 +1,9 @@
 import { ctx, drawSprite, fillRect, TextStyle, writeLine } from "./engine.js";
 import { Colors, drawFrame, UI } from "./ui.js";
-import { assert, Rectangle } from "./utils.js";
+import { Rectangle } from "./utils.js";
 import * as Sprites from "./sprites.js";
 
 /**
- * @import { Point } from "./utils.js";
- * @import { Card, Game, Pile } from "./game.js";
  * @import { Sprite, NineSliceSprite } from "./sprites.js";
  */
 

@@ -36,9 +36,9 @@ class MenuScreenButton extends SpriteButton {
   /**
    * @param {object} config
    * @param {string} config.label
-   * @param {import("./sprites").Sprite} config.sprite
-   * @param {import("./sprites").Sprite} [config.hoverSprite]
-   * @param {import("./sprites").Sprite} [config.activeSprite]
+   * @param {Sprite} config.sprite
+   * @param {Sprite} [config.hoverSprite]
+   * @param {Sprite} [config.activeSprite]
    * @param {() => void} config.onClick
    */
   constructor(config) {
