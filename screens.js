@@ -8,8 +8,8 @@ import {
   Timer,
   pixelToGrid,
 } from "./engine.js";
-import { UI, GameInfo, Screen, alignToRow, drawFrame } from "./ui.js";
-import { Rectangle, assert, lerp, required } from "./utils.js";
+import { UI, GameInfo, Screen, alignToRow, drawFrame, Drag } from "./ui.js";
+import { Rectangle, assert, easeInOut, lerp, required } from "./utils.js";
 import * as Sprites from "./sprites.js";
 import {
   CardStackButton,
@@ -319,6 +319,11 @@ export class GameScreen extends Screen {
 }
 
 export class BoardScreen extends GameScreen {
+  /**
+   * @private
+   */
+  drag = new Drag();
+
   info = new GameInfo({
     name: "Hunt",
     get description() {
@@ -352,8 +357,6 @@ export class BoardScreen extends GameScreen {
    * @type {Card | undefined}
    */
   draggingCard = undefined;
-  dragOriginX = 0;
-  dragOriginY = 0;
 
   /**
    * @param {Game} game
@@ -429,14 +432,15 @@ export class BoardScreen extends GameScreen {
   }
 
   updateDraggingCard() {
+    this.drag.update();
+
     let card = this.draggingCard;
 
     if (!card) {
       for (let card of this.game.board.hand) {
         if (card?.isPressed()) {
+          this.drag.begin();
           this.draggingCard = card;
-          this.dragOriginX = UI.pointer.x - card.offsetX;
-          this.dragOriginY = UI.pointer.y - card.offsetY;
           break;
         }
       }
@@ -452,22 +456,35 @@ export class BoardScreen extends GameScreen {
       card.offsetY = pos.y - card.bounds.y;
       card.opacity = 0.5;
     } else {
-      card.offsetX = UI.pointer.x - this.dragOriginX;
-      card.offsetY = UI.pointer.y - this.dragOriginY;
+      card.offsetX = this.drag.deltaX;
+      card.offsetY = this.drag.deltaY;
       card.opacity = 1;
     }
 
-    if (!UI.pointer.isDown()) {
+    if (this.drag.isReleased()) {
       this.draggingCard = undefined;
+      this.drag.end();
 
       card.opacity = 1;
 
       if (tile?.isEmpty()) {
         this.game.board.addActionsBottom(new PlayCard(card, tile));
       } else {
+        let { offsetX, offsetY } = card;
+        card.interactive = false;
+
         // Otherwise go back to the hand.
-        card.offsetX = 0;
-        card.offsetY = 0;
+        Timer.global({
+          duration: 200,
+          update(t) {
+            let k = easeInOut(t);
+            card.offsetX = lerp(offsetX, 0, k);
+            card.offsetY = lerp(offsetY, 0, k);
+          },
+          done() {
+            card.interactive = true;
+          },
+        });
       }
     }
   }
