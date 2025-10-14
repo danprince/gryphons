@@ -9,6 +9,7 @@ import {
   DestroyCard,
   Delay,
   MoveToGravePile,
+  DrawCard,
 } from "./actions.js";
 import {
   Card,
@@ -437,6 +438,22 @@ export const Miner = new CardType({
     for (let neighbour of game.board.getAdjacentCards(card)) {
       if (neighbour.type === Rocks || neighbour.type === Bones) {
         game.board.addActionsBottom(new MoveToGravePile(neighbour));
+      }
+    }
+  },
+});
+
+export const GraveRobber = new CardType({
+  category: Human,
+  sprite: Sprites.card_grave_robber,
+  name: "Grave Robber",
+  description: "When played draw a card for all adjacent bones",
+  counter: 1,
+  effects: [AttackOneRandomMonster, Remains],
+  onPlay(game, card) {
+    for (let neighbour of game.board.getAdjacentCards(card)) {
+      if (neighbour.type === Bones) {
+        game.board.addActionsBottom(new DrawCard());
       }
     }
   },

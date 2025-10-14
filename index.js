@@ -19,6 +19,7 @@ import {
   YoungGryphon,
   StonyGryphon,
   Chest,
+  GraveRobber,
 } from "./cards.js";
 import { Card, Game } from "./game.js";
 import { BoardScreen, MenuScreen } from "./screens.js";
@@ -38,6 +39,7 @@ for (let i = 0; i < 20; i++) {
     Commander,
     Wizard,
     Miner,
+    GraveRobber,
   ]);
   let card = new Card(type);
   game.deck.addToTop(card);
@@ -55,6 +57,7 @@ for (let i = 0; i < 10; i++) {
     StonyGryphon,
     Chest,
     Rocks,
+    Bones,
     Bones,
   ]);
   let card = new Card(type);

@@ -28,6 +28,7 @@
 
 export const $url = "./sprites.png";
 export const button_disabled = { y: 72, url: $url, height: 10, width: 7, center: { y: 3, width: 1, height: 2, x: 3, }, x: 14, };
+export const card_grave_robber = { y: 72, url: $url, height: 24, width: 24, x: 360, };
 export const card_ghostly_gryphon = { y: 96, url: $url, height: 24, width: 24, x: 264, };
 export const card_chest_open = { y: 120, url: $url, height: 24, width: 24, x: 144, };
 export const card_chest = { y: 120, url: $url, height: 24, width: 24, x: 120, };
