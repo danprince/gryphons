@@ -322,7 +322,7 @@ export class BoardScreen extends GameScreen {
 
   handPanel = new Panel({
     sprite: Sprites.panel_hand,
-    bounds: UI.HAND.clone().grow(3),
+    bounds: UI.HAND.grow(3),
     backgroundColor: "black",
   });
 
@@ -543,7 +543,7 @@ export class CardPileScreen extends Screen {
    * @private
    * @type {Rectangle}
    */
-  CARD_AREA = UI.CENTER_PANEL.clone().grow(-gridToPixel(1));
+  CARD_AREA = UI.CENTER_PANEL.grow(-gridToPixel(1));
 
   /**
    * @private
@@ -598,7 +598,7 @@ export class CardPileScreen extends Screen {
   }
 
   render() {
-    drawFrame(Sprites.panel_table, this.CARD_AREA.clone().grow(3));
+    drawFrame(Sprites.panel_table, this.CARD_AREA.grow(3));
 
     if (UI.cardInfo) {
       drawFrame(Sprites.panel, UI.RIGHT_PANEL);

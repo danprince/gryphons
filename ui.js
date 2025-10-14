@@ -404,7 +404,7 @@ export class Message {
     this.bounds.h = TextStyle.font.glyphHeight;
     this.bounds.x = UI.HAND.center.x - this.bounds.w / 2;
     this.bounds.y = UI.HAND.y + UI.HAND.h - this.bounds.h / 2;
-    this.bounds.grow(3);
+    this.bounds = this.bounds.grow(3);
 
     let y0 = this.bounds.y + 10;
     let y1 = this.bounds.y;
@@ -546,7 +546,7 @@ export class CardInfo {
    */
   render(bounds) {
     let { card } = this;
-    let { x, y, w } = bounds.clone().grow(-5);
+    let { x, y, w } = bounds.grow(-5);
     let gap = 5;
 
     TextStyle.save();

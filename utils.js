@@ -253,13 +253,23 @@ export class Rectangle {
 
   /**
    * @param {number} size
+   * @returns {Rectangle}
    */
   grow(size) {
-    this.x -= size;
-    this.y -= size;
-    this.w += size * 2;
-    this.h += size * 2;
-    return this;
+    return new Rectangle(
+      this.x - size,
+      this.y - size,
+      this.w + size * 2,
+      this.h + size * 2,
+    );
+  }
+
+  /**
+   * @param {number} size
+   * @returns {Rectangle}
+   */
+  shrink(size) {
+    return this.grow(-size);
   }
 
   /**
