@@ -10,14 +10,7 @@ import {
   Timer,
   pixelToGrid,
 } from "./engine.js";
-import {
-  UI,
-  GameInfo,
-  Screen,
-  alignToRow,
-  drawFrame,
-  GRID_RECT,
-} from "./ui.js";
+import { UI, GameInfo, Screen, alignToRow, drawFrame } from "./ui.js";
 import { Rectangle, assert, lerp, required } from "./utils.js";
 import * as Sprites from "./sprites.js";
 import {
@@ -317,7 +310,8 @@ export class GameScreen extends Screen {
 export class BoardScreen extends GameScreen {
   info = new GameInfo({
     name: "Hunt",
-    description: "Hunting description",
+    description:
+      "Remove all the gryphons from this roost before running out of cards!",
     panelSprite: Sprites.panel,
     bannerSprite: Sprites.banner_neutral,
   });
@@ -721,7 +715,7 @@ export class ShopScreenItem extends UIElement {
   }
 }
 
-export class ShopScreen extends Screen {
+export class ShopScreen extends GameScreen {
   LEFT_PANEL = UI.LEFT_PANEL;
   CENTER_PANEL = UI.CENTER_PANEL;
   STOCK_GRID = this.CENTER_PANEL.shrink(gridToPixel(1));
@@ -729,6 +723,12 @@ export class ShopScreen extends Screen {
   COLUMNS = 4;
   ROWS = 4;
   GAP = 1;
+
+  info = new GameInfo({
+    name: "Shop",
+    description: "This is where you buy cards",
+    bannerSprite: Sprites.banner_victory,
+  });
 
   /**
    * @private
@@ -751,7 +751,7 @@ export class ShopScreen extends Screen {
    * @param {CardType[]} config.cardTypes
    */
   constructor(config) {
-    super();
+    super(Game.current);
     this.cardsTypes = config.cardTypes;
 
     this.items = this.cardsTypes.map((type, index) => {
@@ -780,6 +780,13 @@ export class ShopScreen extends Screen {
    * @param {number} dt
    */
   update(dt) {
+    super.update(dt);
+
+    this.goldButton.update();
+    this.feathersButton.update();
+    this.deckButton.update();
+    this.leaveButton.update();
+
     this.doneButton.update();
 
     for (let item of this.items) {
@@ -791,6 +798,22 @@ export class ShopScreen extends Screen {
     drawFrame(Sprites.panel, this.LEFT_PANEL);
     drawFrame(Sprites.panel, this.RIGHT_PANEL);
     UI.cardInfo?.render(this.RIGHT_PANEL);
+    UI.activeGameInfo?.render(this.LEFT_PANEL);
+
+    for (let y = 0; y < this.ROWS; y++) {
+      for (let x = 0; x < this.COLUMNS; x++) {
+        drawSprite(
+          Sprites.ui_tile_empty,
+          this.STOCK_GRID.x + gridToPixel(x * 2),
+          this.STOCK_GRID.y + gridToPixel(y * 2),
+        );
+      }
+    }
+
+    this.goldButton.render();
+    this.feathersButton.render();
+    this.deckButton.render();
+    this.leaveButton.render();
 
     drawFrame(Sprites.panel_shop, this.CENTER_PANEL);
     drawSprite(
