@@ -20,6 +20,7 @@ import {
   StonyGryphon,
   Chest,
   GraveRobber,
+  SkeletalGryphon,
 } from "./cards.js";
 import { Card, Game } from "./game.js";
 import { BoardScreen, MenuScreen } from "./screens.js";
@@ -55,6 +56,7 @@ for (let i = 0; i < 10; i++) {
     MeanGryphon,
     ProudGryphon,
     StonyGryphon,
+    SkeletalGryphon,
     Chest,
     Rocks,
     Bones,

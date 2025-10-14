@@ -487,3 +487,20 @@ export const GhostlyGryphon = new CardType({
     }
   },
 });
+
+export const SkeletalGryphon = new CardType({
+  category: Monster,
+  sprite: Sprites.card_skeletal_gryphon,
+  name: "Skeletal Gryphon",
+  description: "Creates bones in empty adjacent tiles on death",
+  counter: 5,
+  effects: [Aggressive],
+  onDeath(game, card) {
+    for (let tile of game.board.getAdjacentTiles(card.tile)) {
+      if (tile.isEmpty()) {
+        let bones = new Card(Bones);
+        game.board.addActionsTop(new PlayCard(bones, tile));
+      }
+    }
+  },
+});
