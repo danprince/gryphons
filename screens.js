@@ -21,9 +21,13 @@ import {
   TextButton,
   UIElement,
 } from "./elements.js";
-import { Card, Game } from "./game.js";
+import { Board, Card, Game } from "./game.js";
 import { Chest, ChestOpen, Monster } from "./cards.js";
-import { generateBoard, generateCardRewards } from "./campaign.js";
+import {
+  generateBoard,
+  generateCardRewards,
+  STARTING_DECK,
+} from "./campaign.js";
 
 /**
  * @import { CardType, Pile } from "./game.js";
@@ -110,7 +114,7 @@ export class MenuScreen extends Screen {
   newGameButton = new MenuScreenButton({
     label: "New game",
     sprite: Sprites.button_new_game,
-    onClick: () => UI.navigate(new BoardScreen(this.game)),
+    onClick: () => this.startNewGame(),
   });
 
   settingsButton = new MenuScreenButton({
@@ -145,6 +149,13 @@ export class MenuScreen extends Screen {
       button.bounds.y = y;
       x += gridToPixel(2);
     }
+  }
+
+  startNewGame() {
+    this.game.deck.addToTop(...STARTING_DECK.map((type) => new Card(type)));
+    this.game.board = generateBoard(this.game);
+    this.game.startRound();
+    UI.navigate(new BoardScreen(this.game));
   }
 
   update() {
@@ -312,8 +323,11 @@ export class GameScreen extends Screen {
 export class BoardScreen extends GameScreen {
   info = new GameInfo({
     name: "Hunt",
-    description:
-      "Remove all the gryphons from this roost before running out of cards!",
+    get description() {
+      return `Level ${
+        Game.current.level + 1
+      }: Remove all the gryphons from this roost before running out of cards!`;
+    },
     panelSprite: Sprites.panel,
     bannerSprite: Sprites.banner_neutral,
   });
@@ -393,6 +407,14 @@ export class BoardScreen extends GameScreen {
       let shop = new ShopScreen({ cardTypes: rewards });
       UI.navigate(shop);
       this.game.board = generateBoard(this.game);
+    }
+
+    if (
+      this.game.board.drawPile.isEmpty() &&
+      this.game.board.discardPile.isEmpty() &&
+      this.game.board.isHandEmpty()
+    ) {
+      UI.navigate(new DefeatScreen(this.game));
     }
   }
 
@@ -849,5 +871,43 @@ export class ShopScreen extends GameScreen {
     }
 
     this.doneButton.render();
+  }
+}
+
+export class DefeatScreen extends GameScreen {
+  continueButton = new TextButton({
+    label: "CONTINUE",
+    x: UI.END_TURN_BUTTON.x,
+    y: UI.END_TURN_BUTTON.y,
+    onClick: () => {
+      // TODO: Implement a less hacky reset.
+      this.game.gold = 0;
+      this.game.feathers = 0;
+      UI.navigate(new MenuScreen(this.game));
+    },
+  });
+
+  update() {
+    this.continueButton.update();
+  }
+
+  render() {
+    TextStyle.save();
+    TextStyle.baseline = "top";
+    TextStyle.align = "center";
+    writeLine("Defeat", UI.BOARD.center.x, 10);
+    TextStyle.restore();
+
+    for (let tile of this.game.board.tiles) {
+      let x = UI.BOARD.x + gridToPixel(tile.x);
+      let y = UI.BOARD.y + gridToPixel(tile.y);
+      drawSprite(Sprites.tile_empty, x, y);
+
+      if (tile.card) {
+        tile.card.render();
+      }
+    }
+
+    this.continueButton.render();
   }
 }

@@ -263,6 +263,13 @@ export class Board {
   }
 
   /**
+   * @returns {boolean}
+   */
+  isHandEmpty() {
+    return this.hand.every((slot) => slot === undefined);
+  }
+
+  /**
    * @param {Card} card
    */
   addCardToHand(card) {
