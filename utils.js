@@ -13,6 +13,11 @@
  */
 
 /**
+ * @template Value
+ * @typedef {[Value, ...Value[]]} NonEmptyArray
+ */
+
+/**
  * @satisfies {Record<string, Point>}
  */
 export const Directions = {

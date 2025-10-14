@@ -26,6 +26,11 @@ export class Game {
    */
   static current;
 
+  /**
+   * The current progress through the game.
+   */
+  level = 0;
+
   gold = 0;
   feathers = 0;
   deck = new Pile();
@@ -58,6 +63,10 @@ export class Game {
 
     // Draw the initial round of cards.
     this.board.addActionsBottom(new DrawCardsUntilHandIsFull());
+  }
+
+  endRound() {
+    this.level += 1;
   }
 
   endTurn() {
@@ -285,7 +294,15 @@ export class Board {
    * @param {...Action} actions
    */
   addActionsTop(...actions) {
-    this.actions.push(...actions);
+    // Actions need to be reversed to go onto the stack in the order they'll
+    // be processed.
+    //
+    // addActionsTop(
+    //   new ActionA(), <-- We naturally expect this to happen first but
+    //   new ActionB(),     but push will put this on top of the stack before
+    //   new ActionC(),     the others meaning it will be processed after them.
+    // )
+    this.actions.push(...actions.reverse());
   }
 
   /**
@@ -293,7 +310,15 @@ export class Board {
    * @param {...Action} actions
    */
   addActionsBottom(...actions) {
-    this.actions.unshift(...actions);
+    // Actions need to be reversed to go onto the stack in the order they'll
+    // be processed.
+    //
+    // addActionsBottom(
+    //   new ActionA(), <-- We naturally expect this to happen first but
+    //   new ActionB(),     but unshift will put this at the bottom of the
+    //   new ActionC(),     stack meaning it will be processed last.
+    // )
+    this.actions.unshift(...actions.reverse());
   }
 
   /**
@@ -350,8 +375,19 @@ export class Board {
       card?.update(dt);
     }
 
+    /**
+     * Set that makes sure we don't update any units twice even if they
+     * move tiles during their turn.
+     * @type {Set<Card>}
+     */
+    let updatedCards = new Set();
+
     for (let tile of this.tiles) {
-      tile.card?.update(dt);
+      let card = tile.card;
+      if (card && !updatedCards.has(card)) {
+        updatedCards.add(card);
+        card.update(dt);
+      }
     }
   }
 

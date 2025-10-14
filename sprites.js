@@ -27,6 +27,7 @@
  */
 
 export const $url = "./sprites.png";
+export const panel_shop_select = { y: 86, url: $url, height: 14, width: 14, center: { y: 6, width: 2, height: 2, x: 6, }, x: 24, };
 export const card_skeletal_gryphon = { y: 96, url: $url, height: 24, width: 24, x: 288, };
 export const button_disabled = { y: 72, url: $url, height: 10, width: 7, center: { y: 3, width: 1, height: 2, x: 3, }, x: 14, };
 export const shop_title = { y: 288, url: $url, height: 13, width: 91, pivot: { y: 5, x: 45, }, x: 0, };

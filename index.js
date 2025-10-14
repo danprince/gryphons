@@ -1,75 +1,14 @@
 // @ts-check
 
-import {
-  Bones,
-  Cleric,
-  Commander,
-  Gladiator,
-  MeanGryphon,
-  Gryphon,
-  Hero,
-  Hunter,
-  Knight,
-  Lich,
-  Miner,
-  ProudGryphon,
-  RestlessGryphon,
-  Rocks,
-  Wizard,
-  YoungGryphon,
-  StonyGryphon,
-  Chest,
-  GraveRobber,
-  SkeletalGryphon,
-} from "./cards.js";
+import { generateBoard, STARTING_DECK } from "./campaign.js";
 import { Card, Game } from "./game.js";
-import { BoardScreen, MenuScreen } from "./screens.js";
+import { BoardScreen } from "./screens.js";
 import { UI } from "./ui.js";
-import { randomItem } from "./utils.js";
 
 let game = new Game();
 
-for (let i = 0; i < 20; i++) {
-  let type = randomItem([
-    Hunter,
-    Cleric,
-    Knight,
-    Hero,
-    Lich,
-    Gladiator,
-    Commander,
-    Wizard,
-    Miner,
-    GraveRobber,
-  ]);
-  let card = new Card(type);
-  game.deck.addToTop(card);
-}
-
-for (let i = 0; i < 10; i++) {
-  let type = randomItem([
-    Gryphon,
-    YoungGryphon,
-    RestlessGryphon,
-    Gryphon,
-    YoungGryphon,
-    MeanGryphon,
-    ProudGryphon,
-    StonyGryphon,
-    SkeletalGryphon,
-    Chest,
-    Rocks,
-    Bones,
-    Bones,
-  ]);
-  let card = new Card(type);
-  let tile = randomItem(game.board.tiles);
-
-  if (tile?.isEmpty()) {
-    tile.add(card);
-  }
-}
-
+game.deck.addToTop(...STARTING_DECK.map((type) => new Card(type)));
+game.board = generateBoard(game);
 game.startRound();
 
 UI.init(new BoardScreen(game));

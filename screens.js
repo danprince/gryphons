@@ -22,6 +22,8 @@ import {
   UIElement,
 } from "./elements.js";
 import { Card, Game } from "./game.js";
+import { Chest, ChestOpen, Monster } from "./cards.js";
+import { generateBoard, generateCardRewards } from "./campaign.js";
 
 /**
  * @import { CardType, Pile } from "./game.js";
@@ -375,6 +377,23 @@ export class BoardScreen extends GameScreen {
 
     this.updateHandHover();
     this.updateDraggingCard();
+
+    let hasMonsters = this.game.board.tiles.some(
+      (tile) =>
+        tile.card?.type.category === Monster &&
+        // TODO: This is probably a sign that chests shouldn't be
+        // implemented as monsters, just need some other system for
+        // saying they are attackable then.
+        (tile.card.type !== Chest || tile.card.type !== ChestOpen),
+    );
+
+    if (!hasMonsters) {
+      this.game.endRound();
+      let rewards = generateCardRewards(this.game);
+      let shop = new ShopScreen({ cardTypes: rewards });
+      UI.navigate(shop);
+      this.game.board = generateBoard(this.game);
+    }
   }
 
   updateHandHover() {
@@ -706,6 +725,9 @@ export class ShopScreenItem extends UIElement {
 
   render() {
     if (this.canBuy() && this.isHovered()) {
+      let bounds = this.card.bounds.grow(3);
+      drawFrame(Sprites.panel_shop_select, bounds);
+    } else if (this.canBuy()) {
       let bounds = this.card.bounds.grow(3);
       drawFrame(Sprites.panel_shop, bounds);
     }
