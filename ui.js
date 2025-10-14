@@ -44,6 +44,7 @@ export const Colors = {
   eiffel: "#9b8d7e",
   kombucha: "#d9a066",
   sepia: "#704517",
+  jet: "#383535",
 };
 
 /**

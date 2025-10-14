@@ -10,8 +10,15 @@ import {
   Timer,
   pixelToGrid,
 } from "./engine.js";
-import { UI, GameInfo, Screen, alignToRow, drawFrame } from "./ui.js";
-import { Rectangle, lerp, required } from "./utils.js";
+import {
+  UI,
+  GameInfo,
+  Screen,
+  alignToRow,
+  drawFrame,
+  GRID_RECT,
+} from "./ui.js";
+import { Rectangle, assert, lerp, required } from "./utils.js";
 import * as Sprites from "./sprites.js";
 import {
   CardStackButton,
@@ -19,10 +26,12 @@ import {
   Panel,
   SpriteButton,
   TextButton,
+  UIElement,
 } from "./elements.js";
+import { Card, Game } from "./game.js";
 
 /**
- * @import { Card, Game, Pile } from "./game.js";
+ * @import { CardType, Pile } from "./game.js";
  * @import { Sprite } from "./sprites.js";
  */
 
@@ -620,5 +629,180 @@ export class CardPileScreen extends Screen {
     }
 
     this.backButton.render();
+  }
+}
+
+export class ShopScreenItem extends UIElement {
+  /**
+   * @private
+   */
+  get game() {
+    return Game.current;
+  }
+
+  /**
+   * @param {object} config
+   * @param {number} config.x
+   * @param {number} config.y
+   * @param {Card} config.card
+   * @param {number} config.cost
+   */
+  constructor(config) {
+    let bounds = new Rectangle(
+      config.x,
+      config.y,
+      gridToPixel(1),
+      gridToPixel(2),
+    );
+
+    super({ bounds });
+
+    this.cost = config.cost;
+    this.available = true;
+
+    this.card = config.card;
+    this.card.visible = true;
+    this.card.bounds.x = this.bounds.x;
+    this.card.bounds.y = this.bounds.y;
+
+    this.button = new TextButton({
+      label: `\u0080 ${this.cost}`,
+      x: this.bounds.x,
+      y: this.card.bounds.y1,
+      padding: 3,
+      onClick: () => this.buy(),
+    });
+
+    this.button.bounds.x = this.bounds.center.x - this.button.bounds.w / 2;
+  }
+
+  buy() {
+    assert(this.canBuy());
+    this.game.deck.addToTop(this.card);
+    this.available = false;
+    this.card.opacity = 0.4;
+  }
+
+  canBuy() {
+    return this.available && this.cost <= this.game.gold;
+  }
+
+  /**
+   *
+   * @param {number} dt
+   */
+  update(dt) {
+    this.card.update(dt);
+    this.button.update();
+
+    if (this.card.isPressed() && this.canBuy()) {
+      this.buy();
+    }
+
+    if (this.button.isHovered()) {
+      UI.inspectCard(this.card);
+    }
+
+    this.button.disabled = !this.canBuy();
+  }
+
+  isHovered() {
+    return this.card.isHovered() || this.button.isHovered();
+  }
+
+  render() {
+    if (this.canBuy() && this.isHovered()) {
+      let bounds = this.card.bounds.grow(3);
+      drawFrame(Sprites.panel_shop, bounds);
+    }
+
+    this.card.render();
+    this.button.render();
+  }
+}
+
+export class ShopScreen extends Screen {
+  LEFT_PANEL = UI.LEFT_PANEL;
+  CENTER_PANEL = UI.CENTER_PANEL;
+  STOCK_GRID = this.CENTER_PANEL.shrink(gridToPixel(1));
+  RIGHT_PANEL = UI.RIGHT_PANEL;
+  COLUMNS = 4;
+  ROWS = 4;
+  GAP = 1;
+
+  /**
+   * @private
+   * @type {ShopScreenItem[]}
+   */
+  items = [];
+
+  /**
+   * @private
+   */
+  doneButton = new TextButton({
+    label: "DONE",
+    x: gridToPixel(8),
+    y: this.CENTER_PANEL.y1,
+    onClick: () => this.done(),
+  });
+
+  /**
+   * @param {object} config
+   * @param {CardType[]} config.cardTypes
+   */
+  constructor(config) {
+    super();
+    this.cardsTypes = config.cardTypes;
+
+    this.items = this.cardsTypes.map((type, index) => {
+      let x = (index % this.COLUMNS) * 2;
+      let y = Math.floor(index / this.COLUMNS) * 2;
+
+      return new ShopScreenItem({
+        x: this.STOCK_GRID.x + gridToPixel(x),
+        y: this.STOCK_GRID.y + gridToPixel(y),
+        card: new Card(type),
+        cost: 0,
+      });
+    });
+  }
+
+  /**
+   * @private
+   */
+  done() {
+    let game = Game.current;
+    game.startRound();
+    UI.navigate(new BoardScreen(game));
+  }
+
+  /**
+   * @param {number} dt
+   */
+  update(dt) {
+    this.doneButton.update();
+
+    for (let item of this.items) {
+      item.update(dt);
+    }
+  }
+
+  render() {
+    drawFrame(Sprites.panel, this.LEFT_PANEL);
+    drawFrame(Sprites.panel, this.RIGHT_PANEL);
+    UI.cardInfo?.render(this.RIGHT_PANEL);
+
+    drawFrame(Sprites.panel_shop, this.CENTER_PANEL);
+    drawSprite(
+      Sprites.shop_title,
+      this.CENTER_PANEL.center.x,
+      this.CENTER_PANEL.y,
+    );
+
+    for (let item of this.items) {
+      item.render();
+    }
+
+    this.doneButton.render();
   }
 }

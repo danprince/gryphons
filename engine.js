@@ -163,8 +163,15 @@ export const TextStyle = {
  */
 export function drawSprite(sprite, x, y) {
   let { x: sx, y: sy, width: sw, height: sh } = sprite;
+
   let dx = Math.round(x);
   let dy = Math.round(y);
+
+  if (sprite.pivot) {
+    dx -= sprite.pivot.x;
+    dy -= sprite.pivot.y;
+  }
+
   ctx.drawImage(spritesImage, sx, sy, sw, sh, dx, dy, sw, sh);
 }
 
