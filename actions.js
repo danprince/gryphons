@@ -63,6 +63,7 @@ export class DrawCard extends Action {
 
     card.visible = true;
     card.interactive = false;
+    card.opacity = 1;
 
     card.animate({
       duration: 300,
@@ -112,6 +113,7 @@ export class DiscardCard extends Action {
 
     card.visible = true;
     card.interactive = false;
+    card.opacity = 1;
 
     card.animate({
       duration: 200,
@@ -160,6 +162,7 @@ export class PlayCard extends Action {
     card.bounds.y = y;
     card.visible = true;
     card.interactive = true;
+    card.opacity = 1;
     // Remove offset that might have been set when card was dragged.
     card.offsetX = 0;
     card.offsetY = 0;
@@ -439,6 +442,7 @@ export class CreateCardInHand extends Action {
 
     card.interactive = false;
     card.visible = true;
+    card.opacity = 1;
 
     card.animate({
       duration: 300,
@@ -462,6 +466,7 @@ export class CreateCardInHand extends Action {
 
     card.interactive = false;
     card.visible = true;
+    card.opacity = 1;
 
     card.animate({
       duration: 300,
