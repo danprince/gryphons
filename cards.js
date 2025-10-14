@@ -260,7 +260,7 @@ export const Hunter = new CardType({
   sprite: Sprites.card_hunter,
   name: "Hunter",
   description: "Damages adjacent gryphons when played.",
-  counter: 3,
+  counter: 2,
   effects: [AttackAllMonsters, Remains],
 });
 
@@ -293,7 +293,7 @@ export const Knight = new CardType({
   sprite: Sprites.card_knight,
   name: "Knight",
   description: "Knocks adjacent gryphons backwards",
-  counter: 3,
+  counter: 2,
   effects: [Remains],
   onPlay(game, card) {
     let enemies = game.board
@@ -316,7 +316,7 @@ export const Hero = new CardType({
   sprite: Sprites.card_hero,
   name: "Hero",
   description: "Return adjacent hunters to the draw pile when played.",
-  counter: 5,
+  counter: 3,
   effects: [AttackAllMonsters, Remains],
   onPlay(game, card) {
     let friends = game.board
