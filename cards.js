@@ -268,7 +268,7 @@ export const Cleric = new CardType({
   category: Human,
   sprite: Sprites.card_cleric,
   name: "Cleric",
-  description: "Heals adjacent units when played.",
+  description: "Heals the weakest adjacent units when played.",
   counter: 1,
   effects: [Remains],
   onPlay(game, card) {
@@ -276,10 +276,13 @@ export const Cleric = new CardType({
       .getAdjacentCards(card)
       .filter((card) => card.type.category === Human);
 
-    for (let friend of friends) {
+    let minCounter = Math.min(...friends.map((friend) => friend.counter));
+    let targets = friends.filter((friend) => friend.counter === minCounter);
+
+    for (let target of targets) {
       game.board.addActionsBottom(
         new Damage({
-          card: friend,
+          card: target,
           amount: -1,
           vfx: VFX.heal,
         }),
