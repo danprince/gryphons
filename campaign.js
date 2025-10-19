@@ -1,7 +1,9 @@
 import {
+  Apostle,
   Bones,
   Cleric,
   Commander,
+  Doctor,
   Gladiator,
   GraveRobber,
   Gryphon,
@@ -11,9 +13,11 @@ import {
   Lich,
   MeanGryphon,
   Miner,
+  Peasant,
   ProudGryphon,
   RestlessGryphon,
   Rocks,
+  Scout,
   SkeletalGryphon,
   StonyGryphon,
   Wizard,
@@ -27,10 +31,11 @@ import { assert, randomItem, required, shuffle } from "./utils.js";
  */
 
 export const STARTING_DECK = [
-  Hunter,
-  Hunter,
-  Hunter,
-  Hunter,
+  Peasant,
+  Peasant,
+  Peasant,
+  Peasant,
+  Peasant,
   Hunter,
   Hunter,
   Cleric,
@@ -134,7 +139,15 @@ const COMMON_REWARDS = [Hunter, Cleric, Miner, Gladiator];
 /**
  * @type {NonEmptyArray<CardType>}
  */
-const UNCOMMON_REWARDS = [Lich, Hero, Knight, GraveRobber];
+const UNCOMMON_REWARDS = [
+  Lich,
+  Hero,
+  Knight,
+  GraveRobber,
+  Apostle,
+  Doctor,
+  Scout,
+];
 
 /**
  * @type {NonEmptyArray<CardType>}

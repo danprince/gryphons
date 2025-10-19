@@ -10,7 +10,12 @@ import {
   required,
   shuffle,
 } from "./utils.js";
-import { DrawCardsUntilHandIsFull, DiscardCard, Action } from "./actions.js";
+import {
+  DrawCardsUntilHandIsFull,
+  DiscardCard,
+  Action,
+  PlayCard,
+} from "./actions.js";
 
 /**
  * @import { Sprite } from "./sprites.js";
@@ -274,11 +279,13 @@ export class Board {
 
   /**
    * @param {Card} card
+   * @returns {number} The index of the card in the hand.
    */
   addCardToHand(card) {
     assert(!this.isHandFull());
     let index = this.hand.indexOf(undefined);
     this.hand[index] = card;
+    return index;
   }
 
   /**
@@ -645,6 +652,10 @@ export class Card {
    */
   animationTimer;
 
+  get category() {
+    return this.type.category;
+  }
+
   /**
    * @param {CardType} type
    */
@@ -874,3 +885,4 @@ export function* getConnectedCards(game, card, category = card.type.category) {
     }
   }
 }
+

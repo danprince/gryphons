@@ -8,6 +8,7 @@ import {
   Delay,
   MoveToGravePile,
   DrawCard,
+  ReturnCardToHand,
 } from "./actions.js";
 import {
   Card,
@@ -456,6 +457,125 @@ export const GraveRobber = new CardType({
       if (neighbour.type === Bones) {
         game.board.addActionsBottom(new DrawCard());
       }
+    }
+  },
+});
+
+export const Peasant = new CardType({
+  category: Human,
+  sprite: Sprites.card_peasant,
+  name: "Peasant",
+  description: "Damages adjacent gryphons if played next to another peasant",
+  counter: 1,
+  effects: [Remains],
+  onPlay(game, card) {
+    let neighbours = game.board.getAdjacentCards(card);
+    let peasants = neighbours.filter((card) => card.type === Peasant);
+    let monsters = neighbours.filter((card) => card.category === Monster);
+
+    if (peasants.length > 0 && monsters.length > 0) {
+      for (let monster of monsters) {
+        game.board.addActionsBottom(
+          new Damage({
+            card: monster,
+            amount: 1,
+            vfx: VFX.slash,
+          }),
+        );
+      }
+    }
+  },
+});
+
+export const Apostle = new CardType({
+  category: Human,
+  sprite: Sprites.card_apostle,
+  name: "Apostle",
+  description: "Heal adjacent units every turn",
+  counter: 1,
+  effects: [Remains],
+  onTurn(game, card) {
+    for (let neighbour of game.board.getAdjacentCards(card)) {
+      if (neighbour.category === Human) {
+        game.board.addActionsBottom(
+          new Damage({
+            card: neighbour,
+            amount: -1,
+            vfx: VFX.heal,
+          }),
+        );
+      }
+    }
+  },
+});
+
+export const Doctor = new CardType({
+  category: Human,
+  sprite: Sprites.card_plague_doctor,
+  name: "Doctor",
+  description:
+    "Each turn, siphon health from the strongest adjacent monsters to the weakest adjacent hunters",
+  counter: 1,
+  effects: [Remains],
+  onTurn(game, card) {
+    let neighbours = game.board.getAdjacentCards(card);
+    let monsters = neighbours.filter((card) => card.category === Monster);
+    let humans = neighbours.filter((card) => card.category === Human);
+
+    let weakestHumanCounter = Math.min(...humans.map((card) => card.counter));
+
+    let strongestMonsterCounter = Math.max(
+      ...monsters.map((card) => card.counter),
+    );
+
+    let weakestHumans = humans.filter(
+      (card) => card.counter === weakestHumanCounter,
+    );
+
+    let strongestMonsters = monsters.filter(
+      (card) => card.counter === strongestMonsterCounter,
+    );
+
+    if (weakestHumans.length === 0 || strongestMonsters.length === 0) {
+      return;
+    }
+
+    for (let monster of strongestMonsters) {
+      game.board.addActionsBottom(
+        new Damage({
+          card: monster,
+          amount: 1,
+          vfx: VFX.slash,
+        }),
+      );
+    }
+
+    for (let human of weakestHumans) {
+      game.board.addActionsBottom(
+        new Damage({
+          card: human,
+          amount: -1,
+          vfx: VFX.heal,
+        }),
+      );
+    }
+  },
+});
+
+export const Scout = new CardType({
+  category: Human,
+  sprite: Sprites.card_scout,
+  name: "Scout",
+  description: "Return a random adjacent unit to your hand",
+  counter: 1,
+  effects: [Remains],
+  onPlay(game, card) {
+    let neighbours = game.board.getAdjacentCards(card);
+    let humans = neighbours.filter((card) => card.category === Human);
+    let human = randomItem(humans);
+
+    if (human) {
+      game.board.addActionsBottom(new ReturnCardToHand(human));
     }
   },
 });
