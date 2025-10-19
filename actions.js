@@ -1,6 +1,6 @@
 import { gridToPixel } from "./engine.js";
 import { Card, Game, Tile } from "./game.js";
-import { Message, UI, VFX } from "./ui.js";
+import { getHandRect, Message, UI, VFX } from "./ui.js";
 import { required, lerp, easeInOut } from "./utils.js";
 
 /**
@@ -463,6 +463,50 @@ export class ReturnCardToDrawPile extends Action {
       },
       done: () => {
         this.card.visible = false;
+      },
+    });
+  }
+}
+
+export class ReturnCardToHand extends Action {
+  /**
+   * @param {Card} card
+   */
+  constructor(card) {
+    super();
+    this.card = card;
+  }
+
+  perform() {
+    let { board } = this.game;
+
+    if (!this.card.isInPlay() || board.isHandFull()) {
+      return Action.done;
+    }
+
+    board.removeCard(this.card);
+    let index = board.addCardToHand(this.card);
+
+    this.animate(index);
+
+    return Action.done;
+  }
+
+  /**
+   * @private
+   * @param {number} index
+   */
+  async animate(index) {
+    let { x: x0, y: y0 } = this.card.bounds;
+    let { x: x1, y: y1 } = getHandRect(index);
+
+    this.card.interactive = false;
+
+    this.card.animate({
+      duration: 300,
+      update: (t) => {
+        this.card.bounds.x = lerp(x0, x1, t);
+        this.card.bounds.y = lerp(y0, y1, t);
       },
     });
   }

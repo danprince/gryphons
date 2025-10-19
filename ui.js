@@ -845,3 +845,15 @@ export class Drag {
     }
   }
 }
+
+/**
+ * @param {number} index
+ */
+export function getHandRect(index) {
+  return new Rectangle(
+    UI.HAND.x + gridToPixel(index),
+    UI.HAND.y,
+    gridToPixel(1),
+    gridToPixel(1),
+  );
+}
