@@ -399,8 +399,9 @@ export class Message {
     this.text = text;
     this.visible = true;
     this.timer = 3000;
-    this.bounds.w = text.length * TextStyle.font.glyphWidth;
-    this.bounds.h = TextStyle.font.glyphHeight;
+    let [w, h] = TextStyle.measure(text);
+    this.bounds.w = w;
+    this.bounds.h = h;
     this.bounds.x = UI.HAND.center.x - this.bounds.w / 2;
     this.bounds.y = UI.HAND.y + UI.HAND.h - this.bounds.h / 2;
     this.bounds = this.bounds.grow(3);

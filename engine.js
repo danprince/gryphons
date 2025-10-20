@@ -125,6 +125,17 @@ export const TextStyle = {
     this.backgroundColor = settings.backgroundColor;
   },
   /**
+   * Measure a single line of text.
+   * @param {string} text
+   * @returns {[width: number, height: number]}
+   */
+  measure(text) {
+    // -1px because the final row/column of each glyph is spacing.
+    let width = text.length * this.font.glyphWidth - 1;
+    let height = this.font.glyphHeight;
+    return [width, height];
+  },
+  /**
    * @type {TextStyle["align"]}
    */
   align: "left",

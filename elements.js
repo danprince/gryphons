@@ -201,9 +201,9 @@ export class TextButton extends Button {
 
   update() {
     let { bounds, padding, label } = this;
-    let { font } = TextStyle;
-    bounds.w = label.length * font.glyphWidth + padding * 2;
-    bounds.h = font.glyphHeight + padding * 2;
+    let [w, h] = TextStyle.measure(label);
+    bounds.w = w + padding * 2;
+    bounds.h = h + padding * 2;
     super.update();
   }
 
