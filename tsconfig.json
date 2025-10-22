@@ -6,6 +6,7 @@
     "allowJs": true,
     "checkJs": true,
     "noEmit": true,
+    "skipLibCheck": true,
     "noUncheckedIndexedAccess": true,
 
     // Bun brings along a bunch of types that I don't want to be visible from
@@ -15,6 +16,6 @@
     //
     // A more complicated composite setup with multiple tsconfig projects would
     // be possible, but way more complicated than is necessary right now.
-    "types": []
+    "types": ["@types/bun"]
   }
 }
