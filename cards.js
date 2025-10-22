@@ -9,6 +9,7 @@ import {
   MoveToGravePile,
   DrawCard,
   ReturnCardToHand,
+  Knockback,
 } from "./actions.js";
 import {
   Card,
@@ -309,7 +310,7 @@ export const Knight = new CardType({
       let dy = enemy.tile.y - card.tile.y;
       let tile = game.board.getTileAt(enemy.tile.x + dx, enemy.tile.y + dy);
       if (tile) {
-        game.board.addActionsBottom(new MoveCard(enemy, tile));
+        game.board.addActionsBottom(new Knockback(enemy, tile));
       }
     }
   },

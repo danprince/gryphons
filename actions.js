@@ -363,6 +363,53 @@ export class DestroyCard extends Action {
   }
 }
 
+export class Knockback extends Action {
+  /**
+   * @param {Card} card
+   * @param {Tile} tile
+   */
+  constructor(card, tile) {
+    super();
+    this.card = card;
+    this.tile = tile;
+  }
+
+  perform() {
+    // Bail if the card was removed from play after the action was created.
+    if (!this.card.isInPlay()) {
+      return Action.done;
+    }
+
+    // Normalize the direction of the knockback so that we never skip tiles.
+    let dx = Math.sign(this.tile.x - this.card.tile.x);
+    let dy = Math.sign(this.tile.y - this.card.tile.y);
+
+    this.game.board.addActionsBottom(
+      // Queue up an action that moves the card into this tile.
+      new MoveCard(this.card, this.tile),
+      // Then an action that damages the card.
+      new Damage({ card: this.card, amount: 1, vfx: VFX.bump }),
+    );
+
+    // If the target tile is empty, then check whether the card will crash into
+    // the card behind the empty tile.
+    if (this.tile.isEmpty()) {
+      let nextTile = this.game.board.getTileAt(
+        this.tile.x + dx,
+        this.tile.y + dy,
+      );
+
+      if (nextTile?.card) {
+        this.game.board.addActionsBottom(
+          new Damage({ card: nextTile.card, amount: 1, vfx: VFX.bump }),
+        );
+      }
+    }
+
+    return Action.done;
+  }
+}
+
 export class MoveCard extends Action {
   /**
    * @param {Card} card

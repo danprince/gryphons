@@ -608,6 +608,7 @@ export class VFX {
   static heal = new VFX(Sprites.vfx_heal);
   static magic = new VFX(Sprites.vfx_magic);
   static burn = new VFX(Sprites.vfx_burn);
+  static bump = new VFX(Sprites.vfx_bump);
 
   /**
    * @type {SpriteAnimation[]}

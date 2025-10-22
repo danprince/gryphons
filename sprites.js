@@ -27,8 +27,9 @@
  */
 
 export const $url = "./sprites.png";
+export const vfx_bump = { y: 384, url: $url, height: 24, width: 96, x: 0, };
 export const card_guardian = { y: 120, url: $url, height: 24, width: 24, x: 144, };
-export const vfx_burn = { y: 360, url: $url, height: 24, width: 97, x: -1, };
+export const vfx_burn = { y: 360, url: $url, height: 24, width: 96, x: 0, };
 export const card_gryphon_bones = { y: 168, url: $url, height: 24, width: 24, x: 96, };
 export const card_egg = { y: 168, url: $url, height: 24, width: 24, x: 120, };
 export const card_fire = { y: 168, url: $url, height: 24, width: 24, x: 144, };
