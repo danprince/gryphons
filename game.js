@@ -855,6 +855,15 @@ export class Tile {
     card.bounds.x = pos.x;
     card.bounds.y = pos.y;
   }
+
+  /**
+   * Mostly just used as a convenient way to get the tile's position as a point
+   * during tests.
+   * @returns {Point}
+   */
+  get position() {
+    return { x: this.x, y: this.y };
+  }
 }
 
 /**
@@ -883,4 +892,3 @@ export function* getConnectedCards(game, card, category = card.type.category) {
     }
   }
 }
-
