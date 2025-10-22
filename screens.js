@@ -150,6 +150,7 @@ export class MenuScreen extends Screen {
   }
 
   startNewGame() {
+    this.game.deck.reset();
     this.game.deck.addToTop(...STARTING_DECK.map((type) => new Card(type)));
     this.game.board = generateBoard(this.game);
     this.game.startRound();
