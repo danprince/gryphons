@@ -607,6 +607,7 @@ export class VFX {
   static claw = new VFX(Sprites.vfx_claw);
   static heal = new VFX(Sprites.vfx_heal);
   static magic = new VFX(Sprites.vfx_magic);
+  static burn = new VFX(Sprites.vfx_burn);
 
   /**
    * @type {SpriteAnimation[]}

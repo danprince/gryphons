@@ -487,6 +487,47 @@ export const Peasant = new CardType({
   },
 });
 
+export const Pyromancer = new CardType({
+  category: Human,
+  sprite: Sprites.card_pyromancer,
+  name: "Pyromancer",
+  description: "Create a fire on all adjacent empty tiles. Immune to fire.",
+  counter: 3,
+  effects: [Remains],
+  onPlay(game, card) {
+    let tiles = game.board.getAdjacentTiles(card.tile);
+
+    for (let tile of tiles) {
+      game.board.addActionsBottom(new PlayCard(new Card(Fire), tile));
+    }
+  },
+});
+
+export const Fire = new CardType({
+  category: Neutral,
+  sprite: Sprites.card_fire,
+  name: "Fire",
+  description:
+    "Damage adjacent tiles creating new fires when units are defeated.",
+  counter: 3,
+  onTurn(game, card) {
+    card.counter -= 1;
+
+    if (card.counter <= 0) {
+      return game.board.addActionsBottom(new DestroyCard(card));
+    }
+
+    for (let target of game.board.getAdjacentCards(card)) {
+      if (target.type !== Fire && target.type !== Pyromancer) {
+        game.board.addActionsBottom(
+          new Damage({ amount: 1, card: target, vfx: VFX.burn }),
+          new PlayCard(new Card(Fire), target.tile),
+        );
+      }
+    }
+  },
+});
+
 export const Apostle = new CardType({
   category: Human,
   sprite: Sprites.card_apostle,

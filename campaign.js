@@ -15,6 +15,7 @@ import {
   Miner,
   Peasant,
   ProudGryphon,
+  Pyromancer,
   RestlessGryphon,
   Rocks,
   Scout,
@@ -152,7 +153,7 @@ const UNCOMMON_REWARDS = [
 /**
  * @type {NonEmptyArray<CardType>}
  */
-const RARE_REWARDS = [Wizard, Commander];
+const RARE_REWARDS = [Wizard, Commander, Pyromancer];
 
 /**
  * @param {Game} game

@@ -27,6 +27,7 @@
  */
 
 export const $url = "./sprites.png";
+export const vfx_burn = { y: 360, url: $url, height: 24, width: 97, x: -1, };
 export const card_gryphon_bones = { y: 168, url: $url, height: 24, width: 24, x: 96, };
 export const card_egg = { y: 168, url: $url, height: 24, width: 24, x: 120, };
 export const card_fire = { y: 168, url: $url, height: 24, width: 24, x: 144, };
@@ -56,7 +57,7 @@ export const card_ghostly_gryphon = { y: 144, url: $url, height: 24, width: 24, 
 export const card_chest_open = { y: 168, url: $url, height: 24, width: 24, x: 24, };
 export const card_chest = { y: 168, url: $url, height: 24, width: 24, x: 0, };
 export const card_miner = { y: 96, url: $url, height: 24, width: 24, x: 216, };
-export const vfx_magic = { y: 336, url: $url, height: 23, width: 96, x: 0, };
+export const vfx_magic = { y: 336, url: $url, height: 24, width: 96, x: 0, };
 export const card_commander = { y: 96, url: $url, height: 24, width: 24, x: 192, };
 export const button_active = { y: 24, url: $url, height: 10, width: 7, center: { y: 4, width: 1, height: 2, x: 3, }, x: 127, };
 export const button = { y: 24, url: $url, height: 10, width: 7, center: { y: 3, width: 1, height: 2, x: 3, }, x: 120, };
