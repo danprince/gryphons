@@ -1,5 +1,5 @@
 /**
- * @import { Sprite } from "./sprites";
+ * @import { Sprite } from "./sprites.js";
  *
  * @typedef {object} Point
  * @prop {number} x
