@@ -1,5 +1,8 @@
 name: Build
-on: [push]
+on:
+  push:
+  release:
+    types: [published]
 
 jobs:
   test:
@@ -23,9 +26,9 @@ jobs:
       ITCH_GAME: gryphons-roost
       ITCH_CHANNEL: web
       BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+      RELEASE_TAG: ${{ github.event.release.tag_name }}
 
-    # TODO: Enable once the workflow is running.
-    # if: startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name == 'release'
 
     steps:
       - uses: actions/checkout@v4
@@ -33,4 +36,4 @@ jobs:
       - run: unzip butler.zip
       - run: chmod +x butler
       - run: zip build.zip *.js *.png *.html
-      - run: ./butler push build.zip $ITCH_USER/$ITCH_GAME:$ITCH_CHANNEL
+      - run: ./butler push build.zip $ITCH_USER/$ITCH_GAME:$ITCH_CHANNEL --userversion $RELEASE_TAG
