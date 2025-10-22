@@ -1,0 +1,33 @@
+name: Build
+on: [push]
+
+env:
+  ITCH_USER: danprince
+  ITCH_GAME: gryphons-roost
+  ITCH_CHANNEL: web
+
+jobs:
+  test:
+    name: ✅ Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+
+      - run: bun install
+      - run: bun run tsc
+      - run: bun test
+
+  publish:
+    name: 🕹️ Publish
+    needs: [test]
+    runs-on: ubuntu-latest
+    # TODO: Enable once the workflow is running.
+    # if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+      - run: curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
+      - run: unzip butler.zip
+      - run: chmod +x butler
+      - run: zip build.zip *.js *.png *.html
+      - run: ./butler push build.zip $ITCH_USER/$ITCH_GAME:$ITCH_CHANNEL
