@@ -15,9 +15,28 @@ import * as Sprites from "./sprites.js";
 
 const GRID_SIZE = 24;
 
-export const canvas = document.createElement("canvas");
-export const ctx = required(canvas.getContext("2d"));
-const spritesImage = loadImage(Sprites.$url);
+/**
+ * @returns {{
+ *  canvas: HTMLCanvasElement,
+ *  ctx: CanvasRenderingContext2D,
+ *  spritesImage: HTMLImageElement
+ * }}
+ */
+function createRenderer() {
+  // If we are not running in a browser, we don't have access to the DOM.
+  // Instead just return an empty object and trust that code (tests etc)
+  // aren't going to be touching any rendering APIs.
+  if (typeof document === "undefined") {
+    return /** @type {any} */ ({});
+  }
+
+  const canvas = document.createElement("canvas");
+  const ctx = required(canvas.getContext("2d"));
+  const spritesImage = loadImage(Sprites.$url);
+  return { canvas, ctx, spritesImage };
+}
+
+export const { canvas, ctx, spritesImage } = createRenderer();
 
 /**
  * Convert a value in grid scale into pixel scale.
