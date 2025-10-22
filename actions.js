@@ -508,6 +508,9 @@ export class ReturnCardToHand extends Action {
         this.card.bounds.x = lerp(x0, x1, t);
         this.card.bounds.y = lerp(y0, y1, t);
       },
+      done: () => {
+        this.card.interactive = true;
+      },
     });
   }
 }
