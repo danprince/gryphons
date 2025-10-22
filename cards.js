@@ -621,6 +621,25 @@ export const Scout = new CardType({
   },
 });
 
+export const Guardian = new CardType({
+  category: Human,
+  sprite: Sprites.card_guardian,
+  name: "Guardian",
+  description: "Takes damage instead when an adjacent ally would be damaged.",
+  counter: 5,
+  effects: [Remains],
+  /*
+  onGlobalDamage(game, card, damage) {
+    if (card.isAdjacentTo(damage.card) && card.isAlly(damage.card)) {
+      damage.card = card;
+      // Or?
+      damage.prevented = true;
+      game.addActionsTop(new Damage({ amount: damage.amount, card, vfx: damage.vfx }));
+    }
+  }
+  */
+});
+
 export const GhostlyGryphon = new CardType({
   category: Neutral,
   sprite: Sprites.card_ghostly_gryphon,
