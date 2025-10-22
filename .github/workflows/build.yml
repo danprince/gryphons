@@ -1,11 +1,6 @@
 name: Build
 on: [push]
 
-env:
-  ITCH_USER: danprince
-  ITCH_GAME: gryphons-roost
-  ITCH_CHANNEL: web
-
 jobs:
   test:
     name: ✅ Test
@@ -22,8 +17,16 @@ jobs:
     name: 🕹️ Publish
     needs: [test]
     runs-on: ubuntu-latest
+
+    env:
+      ITCH_USER: danprince
+      ITCH_GAME: gryphons-roost
+      ITCH_CHANNEL: web
+      BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+
     # TODO: Enable once the workflow is running.
     # if: startsWith(github.ref, 'refs/tags/v')
+
     steps:
       - uses: actions/checkout@v4
       - run: curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
