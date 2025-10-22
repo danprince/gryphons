@@ -27,6 +27,14 @@
  */
 
 export const $url = "./sprites.png";
+export const card_gryphon_bones = { y: 168, url: $url, height: 24, width: 24, x: 96, };
+export const card_egg = { y: 168, url: $url, height: 24, width: 24, x: 120, };
+export const card_fire = { y: 168, url: $url, height: 24, width: 24, x: 144, };
+export const card_pyromancer = { y: 120, url: $url, height: 24, width: 24, x: 96, };
+export const icon_shuffle = { y: 8, url: $url, height: 8, width: 8, x: 112, };
+export const icon_discard = { y: 8, url: $url, height: 8, width: 8, x: 104, };
+export const icon_draw = { y: 8, url: $url, height: 8, width: 8, x: 96, };
+export const icon_arrow = { y: 0, url: $url, height: 8, width: 8, x: 104, };
 export const card_peasant = { y: 120, url: $url, height: 24, width: 24, x: 120, };
 export const card_scout = { y: 120, url: $url, height: 24, width: 24, x: 72, };
 export const card_plague_doctor = { y: 120, url: $url, height: 24, width: 24, x: 48, };
@@ -98,17 +106,16 @@ export const card_young_gryphon = { y: 144, url: $url, height: 24, width: 24, x:
 export const counter_frame_monster = { y: 16, url: $url, height: 11, width: 9, x: 73, };
 export const counter_frame_human = { y: 16, url: $url, height: 11, width: 9, x: 64, };
 export const counter_frame_neutral = { y: 16, url: $url, height: 11, width: 9, x: 82, };
-export const icon_vanish = { y: 0, url: $url, height: 8, width: 8, x: 104, };
 export const card_rocks = { y: 168, url: $url, height: 24, width: 24, x: 48, };
 export const card_bones = { y: 168, url: $url, height: 24, width: 24, x: 72, };
-export const icon_skull = { y: 0, url: $url, height: 8, width: 8, x: 112, };
+export const icon_defeat = { y: 0, url: $url, height: 8, width: 8, x: 112, };
 export const vfx_heal = { y: 312, url: $url, height: 24, width: 96, x: 0, };
 export const icon_heal = { y: 8, url: $url, height: 8, width: 8, x: 64, };
 export const card_wizard = { y: 96, url: $url, height: 24, width: 24, x: 120, };
 export const card_hero = { y: 96, url: $url, height: 24, width: 24, x: 144, };
 export const icon_flying = { y: 8, url: $url, height: 8, width: 8, x: 72, };
 export const card_restless_gryphon = { y: 144, url: $url, height: 24, width: 24, x: 120, };
-export const icon_knockback = { y: 8, url: $url, height: 8, width: 8, x: 80, };
+export const icon_damage = { y: 8, url: $url, height: 8, width: 8, x: 80, };
 export const card_thrall = { y: 96, url: $url, height: 24, width: 24, x: 96, };
 export const card_gladiator = { y: 96, url: $url, height: 24, width: 24, x: 168, };
-export const icon_attack = { y: 8, url: $url, height: 8, width: 8, x: 88, };
+export const icon_play = { y: 8, url: $url, height: 8, width: 8, x: 88, };

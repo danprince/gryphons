@@ -51,7 +51,7 @@ export const Flying = new CardEffect({
 });
 
 export const Remains = new CardEffect({
-  icon: Sprites.icon_skull,
+  icon: Sprites.icon_defeat,
   name: "Remains",
   description: "Leaves behind bones",
   onDeath(game, card) {
@@ -61,7 +61,7 @@ export const Remains = new CardEffect({
 });
 
 export const Aggressive = new CardEffect({
-  icon: Sprites.icon_skull,
+  icon: Sprites.icon_damage,
   name: "Aggressive",
   description: "Attacks one adjacent enemy each turn",
   onTurn(game, card) {
@@ -80,7 +80,7 @@ export const Aggressive = new CardEffect({
 });
 
 export const AttackAllMonsters = new CardEffect({
-  icon: Sprites.icon_attack,
+  icon: Sprites.icon_flag,
   name: "Attack",
   description: "Attacks all adjacent gryphons when played",
   onPlay(game, card) {
@@ -97,7 +97,7 @@ export const AttackAllMonsters = new CardEffect({
 });
 
 export const AttackOneRandomMonster = new CardEffect({
-  icon: Sprites.icon_attack,
+  icon: Sprites.icon_flag,
   name: "Attack",
   description: "Attacks one adjacent gryphon when played",
   onPlay(game, card) {
