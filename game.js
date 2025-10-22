@@ -49,6 +49,8 @@ export class Game {
   }
 
   startRound() {
+    this.level += 1;
+
     // Reset the piles for a new round.
     this.board.drawPile.reset();
     this.board.discardPile.reset();
@@ -66,10 +68,6 @@ export class Game {
 
     // Draw the initial round of cards.
     this.board.addActionsBottom(new DrawCardsUntilHandIsFull());
-  }
-
-  endRound() {
-    this.level += 1;
   }
 
   endTurn() {

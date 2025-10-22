@@ -403,11 +403,7 @@ export class BoardScreen extends GameScreen {
     );
 
     if (!hasMonsters) {
-      this.game.endRound();
-      let rewards = generateCardRewards(this.game);
-      let shop = new ShopScreen({ cardTypes: rewards });
-      UI.navigate(shop);
-      this.game.board = generateBoard(this.game);
+      return UI.navigate(new VictoryScreen(this.game));
     }
 
     if (
@@ -415,7 +411,7 @@ export class BoardScreen extends GameScreen {
       this.game.board.discardPile.isEmpty() &&
       this.game.board.isHandEmpty()
     ) {
-      UI.navigate(new DefeatScreen(this.game));
+      return UI.navigate(new DefeatScreen(this.game));
     }
   }
 
@@ -831,6 +827,7 @@ export class ShopScreen extends GameScreen {
    */
   done() {
     let game = Game.current;
+    this.game.board = generateBoard(this.game);
     game.startRound();
     UI.navigate(new BoardScreen(game));
   }
@@ -911,6 +908,46 @@ export class DefeatScreen extends GameScreen {
     TextStyle.baseline = "top";
     TextStyle.align = "center";
     writeLine("Defeat", UI.BOARD.center.x, 10);
+    TextStyle.restore();
+
+    for (let tile of this.game.board.tiles) {
+      let x = UI.BOARD.x + gridToPixel(tile.x);
+      let y = UI.BOARD.y + gridToPixel(tile.y);
+      drawSprite(Sprites.tile_empty, x, y);
+
+      if (tile.card) {
+        tile.card.render();
+      }
+    }
+
+    this.continueButton.render();
+  }
+}
+export class VictoryScreen extends GameScreen {
+  continueButton = new TextButton({
+    label: "CONTINUE",
+    x: UI.END_TURN_BUTTON.x,
+    y: UI.END_TURN_BUTTON.y,
+    onClick: () => {
+      let rewards = generateCardRewards(this.game);
+      let shop = new ShopScreen({ cardTypes: rewards });
+      UI.navigate(shop);
+    },
+  });
+
+  /**
+   * @param {number} dt
+   */
+  update(dt) {
+    this.continueButton.update();
+    this.game.board.update(dt);
+  }
+
+  render() {
+    TextStyle.save();
+    TextStyle.baseline = "top";
+    TextStyle.align = "center";
+    writeLine("Victory!", UI.BOARD.center.x, 10);
     TextStyle.restore();
 
     for (let tile of this.game.board.tiles) {
