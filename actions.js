@@ -1,5 +1,5 @@
 import { gridToPixel } from "./engine.js";
-import { Card, Game, Tile } from "./game.js";
+import { Card, CardTrigger, Game, Tile } from "./game.js";
 import { getHandRect, Message, UI, VFX } from "./ui.js";
 import { required, lerp, easeInOut } from "./utils.js";
 
@@ -108,7 +108,7 @@ export class DrawCard extends Action {
 
     let card = required(board.drawPile.removeFromTop());
     board.addCardToHand(card);
-    this.game.onDraw(card);
+    this.game.trigger(CardTrigger.Draw, card);
 
     this.animate(card);
 
@@ -236,7 +236,7 @@ export class PlayCard extends Action {
 
     tile.add(card);
 
-    this.game.onPlay(card);
+    this.game.trigger(CardTrigger.Play, card);
 
     return Action.done;
   }
@@ -291,7 +291,7 @@ export class Damage extends Action {
 
     this.card.counter -= this.amount;
 
-    this.game.onDamage(this.card);
+    this.game.trigger(CardTrigger.Damage, this.card);
 
     if (this.card.counter <= 0) {
       board.addActionsTop(new MoveToGravePile(this.card));
@@ -311,7 +311,7 @@ export class MoveToGravePile extends Action {
   }
 
   perform() {
-    this.game.onDeath(this.card);
+    this.game.trigger(CardTrigger.Defeat, this.card);
     this.game.deck.remove(this.card);
     this.game.board.removeCard(this.card);
     this.game.board.gravePile.addToTop(this.card);

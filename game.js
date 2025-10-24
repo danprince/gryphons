@@ -10,12 +10,7 @@ import {
   required,
   shuffle,
 } from "./utils.js";
-import {
-  DrawCardsUntilHandIsFull,
-  DiscardCard,
-  Action,
-  PlayCard,
-} from "./actions.js";
+import { DrawCardsUntilHandIsFull, DiscardCard, Action } from "./actions.js";
 
 /**
  * @import { Sprite } from "./sprites.js";
@@ -79,7 +74,7 @@ export class Game {
 
     for (let tile of this.board.tiles) {
       if (tile.card) {
-        this.onTurn(tile.card);
+        this.trigger(CardTrigger.Turn, tile.card);
       }
     }
 
@@ -88,94 +83,15 @@ export class Game {
   }
 
   /**
-   * Called when a card is drawn into the player's hand.
+   * @param {CardTrigger} type
    * @param {Card} card
    */
-  onDraw(card) {
-    card.type.onDraw?.(this, card);
-
-    for (let effect of card.effects) {
-      effect.onDraw?.(this, card);
-    }
-
-    for (let trinket of this.trinkets) {
-      trinket.type.onDraw?.(this, trinket, card);
-    }
-  }
-
-  /**
-   * Called when a card is played onto the board.
-   * @param {Card} card
-   */
-  onPlay(card) {
-    card.type.onPlay?.(this, card);
-
-    for (let effect of card.effects) {
-      effect.onPlay?.(this, card);
-    }
-
-    for (let trinket of this.trinkets) {
-      trinket.type.onPlay?.(this, trinket, card);
-    }
-  }
-
-  /**
-   * Called when a card is sent to the discard pile.
-   * @param {Card} card
-   */
-  onDiscard(card) {
-    card.type.onDiscard?.(this, card);
-
-    for (let effect of card.effects) {
-      effect.onDiscard?.(this, card);
-    }
-
-    for (let trinket of this.trinkets) {
-      trinket.type.onDiscard?.(this, trinket, card);
-    }
-  }
-
-  /**
-   * Called when a card updates after the player ends their turn.
-   * @param {Card} card
-   */
-  onTurn(card) {
-    card.type.onTurn?.(this, card);
-
-    for (let effect of card.effects) {
-      effect.onTurn?.(this, card);
-    }
-  }
-
-  /**
-   * Called when the card is sent to the grave pile.
-   * @param {Card} card
-   */
-  onDeath(card) {
-    card.type.onDeath?.(this, card);
-
-    for (let effect of card.effects) {
-      effect.onDeath?.(this, card);
-    }
-
-    for (let trinket of this.trinkets) {
-      trinket.type.onDeath?.(this, trinket, card);
-    }
-  }
-
-  /**
-   * Called when a card is damaged.
-   * @param {Card} card
-   */
-  onDamage(card) {
-    card.type.onDamage?.(this, card);
-
-    for (let effect of card.effects) {
-      effect.onDamage?.(this, card);
-    }
-
-    for (let trinket of this.trinkets) {
-      trinket.type.onDamage?.(this, trinket, card);
+  trigger(type, card) {
+    for (let [trigger, effect] of card.type.effects.items) {
+      if (trigger === type && effect.canRun(this, card)) {
+        let targets = effect.getTargets(this, card);
+        effect.run(this, card, targets);
+      }
     }
   }
 }
@@ -368,6 +284,36 @@ export class Board {
       .filter(isNonNullable);
   }
 
+  getCardsInPlay() {
+    return this.tiles.map((tile) => tile.card).filter(isNonNullable);
+  }
+
+  /**
+   * @param {Card} card
+   * @param {(card: Card) => boolean} filter
+   * @returns {Generator<Card>}
+   */
+  *search(card, filter) {
+    let seen = new Set([card]);
+    let stack = [card];
+
+    while (stack.length > 0) {
+      let card = required(stack.pop());
+      let neighbours = this.getAdjacentCards(card);
+
+      for (let neighbour of neighbours) {
+        if (!seen.has(neighbour)) {
+          seen.add(neighbour);
+
+          if (filter(neighbour)) {
+            yield neighbour;
+            stack.push(neighbour);
+          }
+        }
+      }
+    }
+  }
+
   /**
    * @param {number} dt
    */
@@ -529,29 +475,186 @@ export class Pile {
   }
 }
 
+/**
+ * @typedef {(game: Game, card: Card) => Iterable<Card>} TargetingFunction
+ * @typedef {(game: Game, card: Card) => Card[]} TargetingSource
+ * @typedef {(game: Game, card: Card, targets: Card[]) => Card[]} TargetingFilter
+ */
+
+export const Targeting = {
+  /**
+   * @param  {[TargetingSource, ...TargetingFilter[]]} filters
+   * @returns {TargetingFunction}
+   */
+  compose([source, ...filters]) {
+    return (game, card) => {
+      let targets = source(game, card);
+
+      for (let filter of filters) {
+        targets = filter(game, card, targets);
+      }
+
+      return targets;
+    };
+  },
+
+  /**
+   *
+   * @param {Game} game
+   * @param {Card} card
+   * @param {TargetingSource} source
+   * @param {...TargetingFilter} filters
+   */
+  select(game, card, source, ...filters) {
+    let targets = source(game, card);
+
+    for (let filter of filters) {
+      targets = filter(game, card, targets);
+    }
+
+    return targets;
+  },
+
+  /**
+   * @type {TargetingFilter}
+   */
+  enemies(game, card, targets) {
+    return targets.filter((target) => card.isEnemy(target));
+  },
+
+  /**
+   * @type {TargetingFilter}
+   */
+  allies(game, card, targets) {
+    return targets.filter((target) => card.isAlly(target));
+  },
+
+  /**
+   * @type {TargetingFilter}
+   */
+  weakest(game, card, targets) {
+    let minCounter = Math.min(...targets.map((target) => target.counter));
+    return targets.filter((target) => target.counter === minCounter);
+  },
+
+  /**
+   * @type {TargetingFilter}
+   */
+  strongest(game, card, targets) {
+    let maxCounter = Math.max(...targets.map((target) => target.counter));
+    return targets.filter((target) => target.counter === maxCounter);
+  },
+
+  /**
+   * @param {(card: Card) => boolean} predicate
+   * @returns {TargetingFilter}
+   */
+  test(predicate) {
+    return (game, card, targets) => targets.filter(predicate);
+  },
+
+  /**
+   * @type {TargetingSource}
+   */
+  adjacent(game, card) {
+    return game.board.getAdjacentCards(card);
+  },
+
+  /**
+   * @type {TargetingSource}
+   */
+  all(game, card) {
+    return game.board.getCardsInPlay();
+  },
+
+  // TODO:
+  // row()
+  // column()
+  // lineOfSight()
+
+  /**
+   * @param {CardType} cardType
+   * @returns {TargetingFilter}
+   */
+  type(cardType) {
+    return (game, card, targets) => {
+      return targets.filter((target) => target.type === cardType);
+    };
+  },
+};
+
+export class CardTrigger {
+  static Play = new CardTrigger("Play");
+  static Draw = new CardTrigger("Draw");
+  static Discard = new CardTrigger("Discard");
+  static Defeat = new CardTrigger("Defeat");
+  static Damage = new CardTrigger("Damage");
+  static Turn = new CardTrigger("Turn");
+
+  /**
+   * @param {string} name
+   */
+  constructor(name) {
+    this.name = name;
+  }
+}
+
 export class CardEffect {
   /**
    * @param {object} config
-   * @param {Sprite} config.icon
-   * @param {string} config.name The name of this effect.
-   * @param {string} config.description A short description of the effect.
-   * @param {(game: Game, card: Card) => void} [config.onDraw]
-   * @param {(game: Game, card: Card) => void} [config.onPlay]
-   * @param {(game: Game, card: Card) => void} [config.onTurn]
-   * @param {(game: Game, card: Card) => void} [config.onDeath]
-   * @param {(game: Game, card: Card) => void} [config.onDamage]
-   * @param {(game: Game, card: Card) => void} [config.onDiscard]
+   * @param {string} [config.description]
+   * @param {(game: Game, card: Card) => boolean} [config.condition]
+   * @param {TargetingFunction | [TargetingSource, ...TargetingFilter[]]} [config.targeting]
+   * @param {(game: Game, card: Card, targets: Card[]) => void} config.run
    */
   constructor(config) {
-    this.icon = config.icon;
-    this.name = config.name;
     this.description = config.description;
-    this.onDraw = config.onDraw;
-    this.onPlay = config.onPlay;
-    this.onTurn = config.onTurn;
-    this.onDeath = config.onDeath;
-    this.onDamage = config.onDamage;
-    this.onDiscard = config.onDiscard;
+    this.targeting = Array.isArray(config.targeting)
+      ? Targeting.compose(config.targeting)
+      : config.targeting;
+    this.run = config.run;
+    this.condition = config.condition;
+  }
+
+  /**
+   * @param {Game} game
+   * @param {Card} card
+   * @returns {boolean}
+   */
+  canRun(game, card) {
+    return this.condition === undefined || this.condition(game, card);
+  }
+
+  /**
+   * @param {Game} game
+   * @param {Card} card
+   * @returns {Card[]}
+   */
+  getTargets(game, card) {
+    return this.targeting ? Array.from(this.targeting(game, card)) : [];
+  }
+}
+
+/**
+ * @typedef {[trigger: CardTrigger, effect: CardEffect]} CardEffectListItem
+ */
+
+export class CardEffectList {
+  /**
+   * @param {CardEffectListItem[]} items
+   */
+  constructor(items = []) {
+    this.items = items;
+  }
+
+  /**
+   * @param {CardTrigger} trigger
+   * @param {CardEffect} effect
+   * @returns {this}
+   */
+  add(trigger, effect) {
+    this.items.push([trigger, effect]);
+    return this;
   }
 }
 
@@ -561,10 +664,14 @@ export class CardCategory {
    * @param {object} config
    * @param {string} config.name
    * @param {Sprite} config.counterFrameSprite
+   * @param {CardCategory[]} [config.enemies]
+   * @param {CardCategory[]} [config.allies]
    */
   constructor(config) {
     this.name = config.name;
     this.counterFrameSprite = config.counterFrameSprite;
+    this.enemies = config.enemies ?? [];
+    this.allies = config.allies ?? [];
   }
 }
 
@@ -576,27 +683,36 @@ export class CardType {
    * @param {string} config.name
    * @param {string} [config.description]
    * @param {number} config.counter
-   * @param {CardEffect[]} [config.effects]
-   * @param {(game: Game, card: Card) => void} [config.onDraw]
-   * @param {(game: Game, card: Card) => void} [config.onPlay]
-   * @param {(game: Game, card: Card) => void} [config.onTurn]
-   * @param {(game: Game, card: Card) => void} [config.onDeath]
-   * @param {(game: Game, card: Card) => void} [config.onDamage]
-   * @param {(game: Game, card: Card) => void} [config.onDiscard]
+   * @param {CardEffectList} [config.effects]
+   * @param {CardEffect} [config.onPlay]
+   * @param {CardEffect} [config.onTurn]
+   * @param {CardEffect} [config.onDefeat]
+   * @param {CardEffect} [config.onDamage]
    */
   constructor(config) {
     this.category = config.category;
     this.sprite = config.sprite;
     this.name = config.name;
-    this.description = config.description ?? "";
+    this.description = config.description;
     this.counter = config.counter;
-    this.effects = config.effects ?? [];
-    this.onDraw = config.onDraw;
-    this.onPlay = config.onPlay;
-    this.onTurn = config.onTurn;
-    this.onDeath = config.onDeath;
-    this.onDamage = config.onDamage;
-    this.onDiscard = config.onDiscard;
+
+    this.effects = config.effects ?? new CardEffectList();
+
+    if (config.onPlay) {
+      this.effects.add(CardTrigger.Play, config.onPlay);
+    }
+
+    if (config.onDefeat) {
+      this.effects.add(CardTrigger.Defeat, config.onDefeat);
+    }
+
+    if (config.onDamage) {
+      this.effects.add(CardTrigger.Damage, config.onDamage);
+    }
+
+    if (config.onTurn) {
+      this.effects.add(CardTrigger.Turn, config.onTurn);
+    }
   }
 }
 
@@ -638,12 +754,6 @@ export class Card {
   offsetY = 0;
 
   /**
-   * The effects that are currently
-   * @type {CardEffect[]}
-   */
-  effects = [];
-
-  /**
    * A mutually exclusive timer for animating this card.
    * @private
    * @type {Timer | undefined}
@@ -661,7 +771,6 @@ export class Card {
     this.type = type;
     this.bounds.w = type.sprite.width;
     this.bounds.h = type.sprite.height;
-    this.effects = [...type.effects];
     this.counter = type.counter;
   }
 
@@ -671,7 +780,6 @@ export class Card {
    */
   copy() {
     let copy = new Card(this.type);
-    copy.effects = [...this.effects];
     copy.counter = this.counter;
     return copy;
   }
@@ -699,6 +807,29 @@ export class Card {
    */
   isInPlay() {
     return this.tile !== Tile.none;
+  }
+
+  /**
+   * @param {Card} card
+   * @return {boolean}
+   */
+  isAlly(card) {
+    return (
+      this.category === card.category ||
+      this.category.allies.includes(card.category) ||
+      card.category.allies.includes(this.category)
+    );
+  }
+
+  /**
+   * @param {Card} card
+   * @return {boolean}
+   */
+  isEnemy(card) {
+    return (
+      this.category.enemies.includes(card.category) ||
+      card.category.enemies.includes(this.category)
+    );
   }
 
   /**
@@ -863,32 +994,5 @@ export class Tile {
    */
   get position() {
     return { x: this.x, y: this.y };
-  }
-}
-
-/**
- * @param {Game} game
- * @param {Card} card
- * @param {CardCategory} category
- * @returns {Generator<Card>}
- */
-export function* getConnectedCards(game, card, category = card.type.category) {
-  let seen = new Set([card]);
-  let stack = [card];
-
-  while (stack.length > 0) {
-    let card = required(stack.pop());
-    let neighbours = game.board.getAdjacentCards(card);
-
-    for (let neighbour of neighbours) {
-      if (!seen.has(neighbour)) {
-        seen.add(neighbour);
-
-        if (neighbour.type.category === category) {
-          yield neighbour;
-          stack.push(neighbour);
-        }
-      }
-    }
   }
 }

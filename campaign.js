@@ -3,7 +3,6 @@ import {
   Bones,
   Cleric,
   Commander,
-  Doctor,
   Gladiator,
   GraveRobber,
   Gryphon,
@@ -146,7 +145,6 @@ const UNCOMMON_REWARDS = [
   Knight,
   GraveRobber,
   Apostle,
-  Doctor,
   Scout,
 ];
 
