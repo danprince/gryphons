@@ -578,14 +578,16 @@ export class CardInfo {
 
     y += gap;
 
-    for (let effect of card.effects) {
-      drawSprite(effect.icon, x, y);
-      TextStyle.align = "left";
-      TextStyle.color = Colors.white;
-      y += writeLine(effect.name, x + 10, y + 1) + 2;
-      TextStyle.color = Colors.eiffel;
-      y += writeText(effect.description, x + 10, y, w - 10);
-      y += gap;
+    for (let [trigger, effect] of card.type.effects.items) {
+      if (effect.description) {
+        TextStyle.align = "left";
+        TextStyle.color = Colors.eiffel;
+        y += writeLine(trigger.name, x, y + 1) + 2;
+
+        TextStyle.color = Colors.white;
+        y += writeText(effect.description, x, y, w);
+        y += gap;
+      }
     }
 
     TextStyle.restore();

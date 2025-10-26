@@ -15,8 +15,10 @@ import {
   Card,
   CardCategory,
   CardEffect,
+  CardEffectList,
+  CardTrigger,
   CardType,
-  getConnectedCards,
+  Targeting,
 } from "./game.js";
 import * as Sprites from "./sprites.js";
 import { VFX } from "./ui.js";
@@ -30,6 +32,7 @@ export const Human = new CardCategory({
 export const Monster = new CardCategory({
   name: "Monster",
   counterFrameSprite: Sprites.counter_frame_monster,
+  enemies: [Human],
 });
 
 export const Neutral = new CardCategory({
@@ -37,11 +40,9 @@ export const Neutral = new CardCategory({
   counterFrameSprite: Sprites.counter_frame_neutral,
 });
 
-export const Flying = new CardEffect({
-  icon: Sprites.icon_flying,
-  name: "Flying",
-  description: "Flies to another tile after taking damage",
-  onDamage(game, card) {
+export const Fly = new CardEffect({
+  description: "Flies to an adjacent tile",
+  run(game, card) {
     let tiles = game.board.getAdjacentTiles(card.tile);
     let emptyTiles = tiles.filter((tile) => tile.isEmpty());
     let emptyTile = randomItem(emptyTiles);
@@ -52,25 +53,18 @@ export const Flying = new CardEffect({
 });
 
 export const Remains = new CardEffect({
-  icon: Sprites.icon_defeat,
-  name: "Remains",
   description: "Leaves behind bones",
-  onDeath(game, card) {
+  run(game, card) {
     let bones = new Card(Bones);
     game.board.addActionsBottom(new PlayCard(bones, card.tile));
   },
 });
 
-export const Aggressive = new CardEffect({
-  icon: Sprites.icon_damage,
-  name: "Aggressive",
+export const Bite = new CardEffect({
   description: "Attacks one adjacent enemy each turn",
-  onTurn(game, card) {
-    let enemies = game.board
-      .getAdjacentCards(card)
-      .filter((card) => card.type.category === Human);
-
-    let target = randomItem(enemies);
+  targeting: [Targeting.adjacent, Targeting.enemies],
+  run(game, card, targets) {
+    let target = randomItem(targets);
 
     if (target) {
       game.board.addActionsBottom(
@@ -81,14 +75,9 @@ export const Aggressive = new CardEffect({
 });
 
 export const AttackAllMonsters = new CardEffect({
-  icon: Sprites.icon_flag,
-  name: "Attack",
   description: "Attacks all adjacent gryphons when played",
-  onPlay(game, card) {
-    let enemies = game.board
-      .getAdjacentCards(card)
-      .filter((card) => card.type.category === Monster);
-
+  targeting: [Targeting.adjacent, Targeting.enemies],
+  run(game, card, enemies) {
     for (let enemy of enemies) {
       game.board.addActionsBottom(
         new Damage({ amount: 1, card: enemy, vfx: VFX.slash }),
@@ -98,14 +87,9 @@ export const AttackAllMonsters = new CardEffect({
 });
 
 export const AttackOneRandomMonster = new CardEffect({
-  icon: Sprites.icon_flag,
-  name: "Attack",
   description: "Attacks one adjacent gryphon when played",
-  onPlay(game, card) {
-    let enemies = game.board
-      .getAdjacentCards(card)
-      .filter((card) => card.type.category === Monster);
-
+  targeting: [Targeting.adjacent, Targeting.enemies],
+  run(game, card, enemies) {
     let enemy = randomItem(enemies);
 
     if (enemy) {
@@ -137,7 +121,7 @@ export const Gryphon = new CardType({
   sprite: Sprites.card_gryphon,
   name: "Gryphon",
   counter: 2,
-  effects: [Aggressive],
+  onTurn: Bite,
 });
 
 export const YoungGryphon = new CardType({
@@ -145,7 +129,7 @@ export const YoungGryphon = new CardType({
   sprite: Sprites.card_young_gryphon,
   name: "Young Gryphon",
   counter: 1,
-  effects: [Aggressive],
+  onTurn: Bite,
 });
 
 export const RestlessGryphon = new CardType({
@@ -153,83 +137,75 @@ export const RestlessGryphon = new CardType({
   sprite: Sprites.card_restless_gryphon,
   name: "Restless Gryphon",
   counter: 3,
-  effects: [Flying, Aggressive],
+  onTurn: Bite,
+  onDamage: Fly,
 });
 
 export const ProudGryphon = new CardType({
   category: Monster,
   sprite: Sprites.card_proud_gryphon,
   name: "Proud Gryphon",
-  description: "Attacks the strongest adjacent hunters",
   counter: 5,
-  onTurn(game, card) {
-    let enemies = game.board
-      .getAdjacentCards(card)
-      .filter((card) => card.type.category === Human);
-
-    let minCounter = Math.max(...enemies.map((card) => card.counter));
-    let targets = enemies.filter((enemy) => enemy.counter === minCounter);
-
-    for (let target of targets) {
-      game.board.addActionsBottom(
-        new Damage({
-          card: target,
-          amount: 1,
-          vfx: VFX.claw,
-        }),
-      );
-    }
-  },
+  onTurn: new CardEffect({
+    description: "Attack the strongest adjacent enemies",
+    targeting: [Targeting.adjacent, Targeting.enemies, Targeting.strongest],
+    run(game, card, targets) {
+      for (let target of targets) {
+        game.board.addActionsBottom(
+          new Damage({
+            card: target,
+            amount: 1,
+            vfx: VFX.claw,
+          }),
+        );
+      }
+    },
+  }),
 });
 
 export const MeanGryphon = new CardType({
   category: Monster,
   sprite: Sprites.card_mean_gryphon,
   name: "Mean Gryphon",
-  description: "Attacks the weakest adjacent hunters",
   counter: 5,
-  onTurn(game, card) {
-    let enemies = game.board
-      .getAdjacentCards(card)
-      .filter((card) => card.type.category === Human);
-
-    let minCounter = Math.min(...enemies.map((card) => card.counter));
-    let targets = enemies.filter((enemy) => enemy.counter === minCounter);
-
-    for (let target of targets) {
-      game.board.addActionsBottom(
-        new Damage({
-          card: target,
-          amount: 1,
-          vfx: VFX.claw,
-        }),
-      );
-    }
-  },
+  onTurn: new CardEffect({
+    description: "Attack the weakest adjacent enemies",
+    targeting: [Targeting.adjacent, Targeting.enemies, Targeting.weakest],
+    run(game, card, targets) {
+      for (let target of targets) {
+        game.board.addActionsBottom(
+          new Damage({
+            card: target,
+            amount: 1,
+            vfx: VFX.claw,
+          }),
+        );
+      }
+    },
+  }),
 });
 
 export const StonyGryphon = new CardType({
   category: Monster,
   sprite: Sprites.card_stone_gryphon,
   name: "Stony Gryphon",
-  description: "Turns one adjacent human into a rock",
   counter: 3,
-  onTurn(game, card) {
-    let hunters = game.board
-      .getAdjacentCards(card)
-      .filter((card) => card.type.category === Human);
+  onTurn: new CardEffect({
+    description: "Turn one adjacent enemy into a rock",
+    targeting: [Targeting.adjacent, Targeting.enemies],
+    run(game, card, targets) {
+      let target = randomItem(targets);
 
-    let hunter = randomItem(hunters);
+      if (target) {
+        let rock = new Card(Rocks);
 
-    if (hunter) {
-      let rock = new Card(Rocks);
-
-      game.board.addActionsBottom(
-        new DestroyCard(hunter),
-        new PlayCard(rock, hunter.tile),
-      );
-    }
-  },
+        game.board.addActionsBottom(
+          new DestroyCard(target),
+          new PlayCard(rock, target.tile),
+        );
+      }
+    },
+  }),
 });
 
 export const Chest = new CardType({
@@ -238,14 +214,15 @@ export const Chest = new CardType({
   name: "Chest",
   description: "What's inside?",
   counter: 9,
-  effects: [],
-  onDeath(game, card) {
-    game.gold += randomItem([5, 10, 20, 30, 100]);
-    game.board.addActionsBottom(
-      new DestroyCard(card),
-      new PlayCard(new Card(ChestOpen), card.tile),
-    );
-  },
+  onDefeat: new CardEffect({
+    run(game, card) {
+      game.gold += randomItem([5, 10, 20, 30, 100]);
+      game.board.addActionsBottom(
+        new DestroyCard(card),
+        new PlayCard(new Card(ChestOpen), card.tile),
+      );
+    },
+  }),
 });
 
 export const ChestOpen = new CardType({
@@ -254,7 +231,6 @@ export const ChestOpen = new CardType({
   name: "Chest",
   description: "Riches galore!",
   counter: 0,
-  effects: [],
 });
 
 export const Hunter = new CardType({
@@ -263,102 +239,98 @@ export const Hunter = new CardType({
   name: "Hunter",
   description: "Damages adjacent gryphons when played.",
   counter: 2,
-  effects: [AttackAllMonsters, Remains],
+  onPlay: AttackAllMonsters,
+  onDefeat: Remains,
 });
 
 export const Cleric = new CardType({
   category: Human,
   sprite: Sprites.card_cleric,
   name: "Cleric",
-  description: "Heals the weakest adjacent units when played.",
   counter: 1,
-  effects: [Remains],
-  onPlay(game, card) {
-    let friends = game.board
-      .getAdjacentCards(card)
-      .filter((card) => card.type.category === Human);
-
-    let minCounter = Math.min(...friends.map((friend) => friend.counter));
-    let targets = friends.filter((friend) => friend.counter === minCounter);
-
-    for (let target of targets) {
-      game.board.addActionsBottom(
-        new Damage({
-          card: target,
-          amount: -1,
-          vfx: VFX.heal,
-        }),
-      );
-    }
-  },
+  onDefeat: Remains,
+  onPlay: new CardEffect({
+    description: "Heals the weakest adjacent allies.",
+    targeting: [Targeting.adjacent, Targeting.allies, Targeting.weakest],
+    run(game, card, targets) {
+      for (let target of targets) {
+        game.board.addActionsBottom(
+          new Damage({
+            card: target,
+            amount: -1,
+            vfx: VFX.heal,
+          }),
+        );
+      }
+    },
+  }),
 });
 
 export const Knight = new CardType({
   category: Human,
   sprite: Sprites.card_knight,
   name: "Knight",
-  description: "Knocks adjacent gryphons backwards",
   counter: 2,
-  effects: [Remains],
-  onPlay(game, card) {
-    let enemies = game.board
-      .getAdjacentCards(card)
-      .filter((card) => card.type.category === Monster);
-
-    for (let enemy of enemies) {
-      let dx = enemy.tile.x - card.tile.x;
-      let dy = enemy.tile.y - card.tile.y;
-      let tile = game.board.getTileAt(enemy.tile.x + dx, enemy.tile.y + dy);
-      if (tile) {
-        game.board.addActionsBottom(new Knockback(enemy, tile));
+  onDefeat: Remains,
+  onPlay: new CardEffect({
+    description: "Knocks adjacent enemies backwards",
+    targeting: [Targeting.adjacent, Targeting.enemies],
+    run(game, card, enemies) {
+      for (let enemy of enemies) {
+        let dx = enemy.tile.x - card.tile.x;
+        let dy = enemy.tile.y - card.tile.y;
+        let tile = game.board.getTileAt(enemy.tile.x + dx, enemy.tile.y + dy);
+        if (tile) {
+          game.board.addActionsBottom(new Knockback(enemy, tile));
+        }
       }
-    }
-  },
+    },
+  }),
 });
 
 export const Hero = new CardType({
   category: Human,
   sprite: Sprites.card_hero,
   name: "Hero",
-  description: "Return adjacent hunters to the draw pile when played.",
   counter: 3,
-  effects: [AttackAllMonsters, Remains],
-  onPlay(game, card) {
-    let friends = game.board
-      .getAdjacentCards(card)
-      .filter((card) => card.type.category === Human);
-
-    for (let card of friends) {
-      game.board.addActionsBottom(new ReturnCardToDrawPile(card));
-    }
-  },
+  onDefeat: Remains,
+  onPlay: new CardEffect({
+    description: "Return weakest adjacent allies to the draw pile.",
+    targeting: [Targeting.adjacent, Targeting.allies, Targeting.weakest],
+    run(game, card, targets) {
+      for (let target of targets) {
+        game.board.addActionsBottom(new ReturnCardToDrawPile(target));
+      }
+    },
+  }),
 });
 
 export const Gladiator = new CardType({
   category: Human,
   sprite: Sprites.card_gladiator,
   name: "Gladiator",
-  description: "Deal damage to one adjacent gryphon and gain +1 if it dies",
   counter: 1,
-  effects: [Remains],
-  onPlay(game, card) {
-    let enemies = game.board
-      .getAdjacentCards(card)
-      .filter((card) => card.type.category === Monster);
-    let enemy = randomItem(enemies);
+  onDefeat: Remains,
+  onPlay: new CardEffect({
+    description:
+      "Deal damage to a random adjacent enemy and gain +1 if it dies",
+    targeting: [Targeting.adjacent, Targeting.enemies],
+    run(game, card, enemies) {
+      let enemy = randomItem(enemies);
 
-    if (enemy) {
-      game.board.addActionsBottom(
-        new Damage({ amount: 1, card: enemy, vfx: VFX.slash }),
-      );
-    }
+      if (enemy) {
+        game.board.addActionsBottom(
+          new Damage({ amount: 1, card: enemy, vfx: VFX.slash }),
+        );
+      }
 
-    if (enemy && enemy.counter <= 1) {
-      game.board.addActionsBottom(
-        new Damage({ amount: -1, card, vfx: VFX.heal }),
-      );
-    }
-  },
+      if (enemy && enemy.counter <= 1) {
+        game.board.addActionsBottom(
+          new Damage({ amount: -1, card, vfx: VFX.heal }),
+        );
+      }
+    },
+  }),
 });
 
 export const Lich = new CardType({
@@ -367,20 +339,19 @@ export const Lich = new CardType({
   name: "Lich",
   description: "Turns adjacent bones into thralls and adds them to your hand",
   counter: 1,
-  onPlay(game, card) {
-    let bones = game.board
-      .getAdjacentCards(card)
-      .filter((card) => card.type === Bones);
+  onPlay: new CardEffect({
+    targeting: [Targeting.adjacent, Targeting.type(Bones)],
+    run(game, card, bones) {
+      for (let bone of bones) {
+        let thrall = new Card(Thrall);
 
-    for (let bone of bones) {
-      let thrall = new Card(Thrall);
-
-      game.board.addActionsBottom(
-        new CreateCardInHand(thrall, bone.tile),
-        new DestroyCard(bone),
-      );
-    }
-  },
+        game.board.addActionsBottom(
+          new CreateCardInHand(thrall, bone.tile),
+          new DestroyCard(bone),
+        );
+      }
+    },
+  }),
 });
 
 export const Thrall = new CardType({
@@ -389,24 +360,29 @@ export const Thrall = new CardType({
   name: "Thrall",
   description: "Attacks one adjacent gryphon",
   counter: 1,
-  effects: [AttackOneRandomMonster],
+  onPlay: AttackOneRandomMonster,
 });
 
 export const Commander = new CardType({
   category: Human,
   sprite: Sprites.card_commander,
   name: "Commander",
-  description: "Return connected cards to the draw pile",
+  description: "Return connected allies to the draw pile",
   counter: 1,
-  effects: [Remains],
-  onPlay(game, card) {
-    for (let friend of getConnectedCards(game, card)) {
-      game.board.addActionsBottom(
-        new ReturnCardToDrawPile(friend),
-        new Delay(50),
-      );
-    }
-  },
+  onDefeat: Remains,
+  onPlay: new CardEffect({
+    targeting(game, card) {
+      return game.board.search(card, (target) => card.isAlly(target));
+    },
+    run(game, card, targets) {
+      for (let friend of targets) {
+        game.board.addActionsBottom(
+          new ReturnCardToDrawPile(friend),
+          new Delay(50),
+        );
+      }
+    },
+  }),
 });
 
 export const Wizard = new CardType({
@@ -415,17 +391,35 @@ export const Wizard = new CardType({
   name: "Wizard",
   description: "Deal damage to all connected enemies.",
   counter: 1,
-  effects: [Remains],
-  onPlay(game, card) {
-    for (let enemy of getConnectedCards(game, card, Monster)) {
-      game.board.addActionsBottom(
-        new Damage({
-          card: enemy,
-          amount: 1,
-          vfx: VFX.magic,
-        }),
-        new Delay(50),
-      );
+  onDefeat: Remains,
+  onPlay: new CardEffect({
+    targeting(game, card) {
+      return game.board.search(card, (target) => card.isEnemy(target));
+    },
+    run(game, card, targets) {
+      for (let target of targets) {
+        game.board.addActionsBottom(
+          new Damage({
+            card: target,
+            amount: 1,
+            vfx: VFX.magic,
+          }),
+          new Delay(50),
+        );
+      }
+    },
+  }),
+});
+
+const MineAdjacentObstacles = new CardEffect({
+  description: "Destroys any touching rocks and bones",
+  targeting: [
+    Targeting.adjacent,
+    Targeting.test((card) => card.type === Bones || card.type === Rocks),
+  ],
+  run(game, card, targets) {
+    for (let target of targets) {
+      game.board.addActionsBottom(new MoveToGravePile(target));
     }
   },
 });
@@ -434,211 +428,156 @@ export const Miner = new CardType({
   category: Human,
   sprite: Sprites.card_miner,
   name: "Miner",
-  description: "Destroys any touching rocks and bones",
   counter: 1,
-  effects: [AttackOneRandomMonster, Remains],
-  onPlay(game, card) {
-    for (let neighbour of game.board.getAdjacentCards(card)) {
-      if (neighbour.type === Rocks || neighbour.type === Bones) {
-        game.board.addActionsBottom(new MoveToGravePile(neighbour));
-      }
-    }
-  },
+  onDefeat: Remains,
+  onPlay: AttackOneRandomMonster,
+  effects: new CardEffectList()
+    .add(CardTrigger.Play, AttackOneRandomMonster)
+    .add(CardTrigger.Play, MineAdjacentObstacles),
 });
 
 export const GraveRobber = new CardType({
   category: Human,
   sprite: Sprites.card_grave_robber,
   name: "Grave Robber",
-  description: "When played draw a card for all adjacent bones",
   counter: 1,
-  effects: [AttackOneRandomMonster, Remains],
-  onPlay(game, card) {
-    for (let neighbour of game.board.getAdjacentCards(card)) {
-      if (neighbour.type === Bones) {
-        game.board.addActionsBottom(new DrawCard());
-      }
-    }
-  },
+  onDefeat: Remains,
+  onPlay: AttackOneRandomMonster,
+  effects: new CardEffectList().add(
+    CardTrigger.Play,
+    new CardEffect({
+      description: "Draw a card for all adjacent bones",
+      targeting: [Targeting.adjacent, Targeting.type(Bones)],
+      run(game, card, targets) {
+        for (let i = 0; i < targets.length; i++) {
+          game.board.addActionsBottom(new DrawCard());
+        }
+      },
+    }),
+  ),
 });
 
 export const Peasant = new CardType({
   category: Human,
   sprite: Sprites.card_peasant,
   name: "Peasant",
-  description: "Damages adjacent gryphons if played next to another peasant",
   counter: 1,
-  effects: [Remains],
-  onPlay(game, card) {
-    let neighbours = game.board.getAdjacentCards(card);
-    let peasants = neighbours.filter((card) => card.type === Peasant);
-    let monsters = neighbours.filter((card) => card.category === Monster);
-
-    if (peasants.length > 0 && monsters.length > 0) {
-      for (let monster of monsters) {
+  onDefeat: Remains,
+  onPlay: new CardEffect({
+    targeting: [Targeting.adjacent, Targeting.enemies],
+    description: "Damages adjacent enemies if next to another peasant",
+    condition(game, card) {
+      return game.board
+        .getAdjacentCards(card)
+        .some((neighbour) => neighbour.type === card.type);
+    },
+    run(game, card, targets) {
+      for (let target of targets) {
         game.board.addActionsBottom(
           new Damage({
-            card: monster,
+            card: target,
             amount: 1,
             vfx: VFX.slash,
           }),
         );
       }
-    }
-  },
+    },
+  }),
 });
 
 export const Pyromancer = new CardType({
   category: Human,
   sprite: Sprites.card_pyromancer,
   name: "Pyromancer",
-  description: "Create a fire on all adjacent empty tiles. Immune to fire.",
   counter: 3,
-  effects: [Remains],
-  onPlay(game, card) {
-    let tiles = game.board.getAdjacentTiles(card.tile);
+  onDefeat: Remains,
+  onPlay: new CardEffect({
+    description: "Create a fire on all adjacent empty tiles. Immune to fire.",
+    run(game, card) {
+      let tiles = game.board.getAdjacentTiles(card.tile);
 
-    for (let tile of tiles) {
-      game.board.addActionsBottom(new PlayCard(new Card(Fire), tile));
-    }
-  },
+      for (let tile of tiles) {
+        game.board.addActionsBottom(new PlayCard(new Card(Fire), tile));
+      }
+    },
+  }),
 });
 
 export const Fire = new CardType({
   category: Neutral,
   sprite: Sprites.card_fire,
   name: "Fire",
-  description:
-    "Damage adjacent tiles creating new fires when units are defeated.",
   counter: 3,
-  onTurn(game, card) {
-    card.counter -= 1;
+  onTurn: new CardEffect({
+    description:
+      "Damage adjacent tiles creating new fires when units are defeated.",
+    targeting: [
+      Targeting.adjacent,
+      Targeting.test(
+        /**
+         * @param {Card} card
+         * @returns {boolean}
+         */
+        (card) => card.type !== Fire && card.type !== Pyromancer,
+      ),
+    ],
+    run(game, card, targets) {
+      card.counter -= 1;
 
-    if (card.counter <= 0) {
-      return game.board.addActionsBottom(new DestroyCard(card));
-    }
+      if (card.counter <= 0) {
+        return game.board.addActionsBottom(new DestroyCard(card));
+      }
 
-    for (let target of game.board.getAdjacentCards(card)) {
-      if (target.type !== Fire && target.type !== Pyromancer) {
+      for (let target of targets) {
         game.board.addActionsBottom(
           new Damage({ amount: 1, card: target, vfx: VFX.burn }),
           new PlayCard(new Card(Fire), target.tile),
         );
       }
-    }
-  },
+    },
+  }),
 });
 
 export const Apostle = new CardType({
   category: Human,
   sprite: Sprites.card_apostle,
   name: "Apostle",
-  description: "Heal adjacent units every turn",
   counter: 1,
-  effects: [Remains],
-  onTurn(game, card) {
-    for (let neighbour of game.board.getAdjacentCards(card)) {
-      if (neighbour.category === Human) {
+  onDefeat: Remains,
+  onTurn: new CardEffect({
+    description: "Heal adjacent units every turn",
+    targeting: [Targeting.adjacent, Targeting.allies],
+    run(game, card, targets) {
+      for (let target of targets) {
         game.board.addActionsBottom(
           new Damage({
-            card: neighbour,
+            card: target,
             amount: -1,
             vfx: VFX.heal,
           }),
         );
       }
-    }
-  },
-});
-
-export const Doctor = new CardType({
-  category: Human,
-  sprite: Sprites.card_plague_doctor,
-  name: "Doctor",
-  description:
-    "Each turn, siphon health from the strongest adjacent monsters to the weakest adjacent hunters",
-  counter: 1,
-  effects: [Remains],
-  onTurn(game, card) {
-    let neighbours = game.board.getAdjacentCards(card);
-    let monsters = neighbours.filter((card) => card.category === Monster);
-    let humans = neighbours.filter((card) => card.category === Human);
-
-    let weakestHumanCounter = Math.min(...humans.map((card) => card.counter));
-
-    let strongestMonsterCounter = Math.max(
-      ...monsters.map((card) => card.counter),
-    );
-
-    let weakestHumans = humans.filter(
-      (card) => card.counter === weakestHumanCounter,
-    );
-
-    let strongestMonsters = monsters.filter(
-      (card) => card.counter === strongestMonsterCounter,
-    );
-
-    if (weakestHumans.length === 0 || strongestMonsters.length === 0) {
-      return;
-    }
-
-    for (let monster of strongestMonsters) {
-      game.board.addActionsBottom(
-        new Damage({
-          card: monster,
-          amount: 1,
-          vfx: VFX.slash,
-        }),
-      );
-    }
-
-    for (let human of weakestHumans) {
-      game.board.addActionsBottom(
-        new Damage({
-          card: human,
-          amount: -1,
-          vfx: VFX.heal,
-        }),
-      );
-    }
-  },
+    },
+  }),
 });
 
 export const Scout = new CardType({
   category: Human,
   sprite: Sprites.card_scout,
   name: "Scout",
-  description: "Return a random adjacent unit to your hand",
   counter: 1,
-  effects: [Remains],
-  onPlay(game, card) {
-    let neighbours = game.board.getAdjacentCards(card);
-    let humans = neighbours.filter((card) => card.category === Human);
-    let human = randomItem(humans);
+  onDefeat: Remains,
+  onPlay: new CardEffect({
+    description: "Return a random adjacent unit to your hand",
+    targeting: [Targeting.adjacent, Targeting.allies],
+    run(game, card, targets) {
+      let target = randomItem(targets);
 
-    if (human) {
-      game.board.addActionsBottom(new ReturnCardToHand(human));
-    }
-  },
-});
-
-export const Guardian = new CardType({
-  category: Human,
-  sprite: Sprites.card_guardian,
-  name: "Guardian",
-  description: "Takes damage instead when an adjacent ally would be damaged.",
-  counter: 5,
-  effects: [Remains],
-  /*
-  onGlobalDamage(game, card, damage) {
-    if (card.isAdjacentTo(damage.card) && card.isAlly(damage.card)) {
-      damage.card = card;
-      // Or?
-      damage.prevented = true;
-      game.addActionsTop(new Damage({ amount: damage.amount, card, vfx: damage.vfx }));
-    }
-  }
-  */
+      if (target) {
+        game.board.addActionsBottom(new ReturnCardToHand(target));
+      }
+    },
+  }),
 });
 
 export const GhostlyGryphon = new CardType({
@@ -647,42 +586,47 @@ export const GhostlyGryphon = new CardType({
   name: "Ghostly Gryphon",
   description: "Woo!",
   counter: 0,
-  onTurn(game, card) {
-    // Turn all neighbours into bones
-    for (let neighbour of game.board.getAdjacentCards(card)) {
-      if (neighbour.type.category === Human) {
-        let bones = new Card(Bones);
-        game.board.addActionsBottom(
-          new MoveToGravePile(neighbour),
-          new PlayCard(bones, neighbour.tile),
-        );
+  onTurn: new CardEffect({
+    targeting: [Targeting.adjacent, Targeting.adjacent],
+    run(game, card, targets) {
+      // Turn all neighbours into bones
+      for (let neighbour of targets) {
+        if (neighbour.type.category === Human) {
+          let bones = new Card(Bones);
+          game.board.addActionsBottom(
+            new MoveToGravePile(neighbour),
+            new PlayCard(bones, neighbour.tile),
+          );
+        }
       }
-    }
 
-    // Then move to an adjacent empty tile
-    let tiles = game.board.getAdjacentTiles(card.tile);
-    let emptyTiles = tiles.filter((tile) => tile.isEmpty());
-    let emptyTile = randomItem(emptyTiles);
+      // Then move to an adjacent empty tile
+      let tiles = game.board.getAdjacentTiles(card.tile);
+      let emptyTiles = tiles.filter((tile) => tile.isEmpty());
+      let emptyTile = randomItem(emptyTiles);
 
-    if (emptyTile) {
-      game.board.addActionsBottom(new MoveCard(card, emptyTile));
-    }
-  },
+      if (emptyTile) {
+        game.board.addActionsBottom(new MoveCard(card, emptyTile));
+      }
+    },
+  }),
 });
 
 export const SkeletalGryphon = new CardType({
   category: Monster,
   sprite: Sprites.card_skeletal_gryphon,
   name: "Skeletal Gryphon",
-  description: "Creates bones in empty adjacent tiles on death",
   counter: 5,
-  effects: [Aggressive],
-  onDeath(game, card) {
-    for (let tile of game.board.getAdjacentTiles(card.tile)) {
-      if (tile.isEmpty()) {
-        let bones = new Card(Bones);
-        game.board.addActionsTop(new PlayCard(bones, tile));
+  onTurn: Bite,
+  onDefeat: new CardEffect({
+    description: "Creates bones in empty adjacent tiles",
+    run(game, card) {
+      for (let tile of game.board.getAdjacentTiles(card.tile)) {
+        if (tile.isEmpty()) {
+          let bones = new Card(Bones);
+          game.board.addActionsTop(new PlayCard(bones, tile));
+        }
       }
-    }
-  },
+    },
+  }),
 });
