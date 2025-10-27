@@ -628,17 +628,18 @@ export class CardEffect {
   /**
    * @param {object} config
    * @param {string} [config.description]
-   * @param {(game: Game, card: Card) => boolean} [config.condition]
+   * @param {(game: Game, card: Card, targets: Card[]) => boolean} [config.condition]
    * @param {TargetingFunction | [TargetingSource, ...TargetingFilter[]]} [config.targeting]
    * @param {(game: Game, card: Card, targets: Card[]) => void} [config.run]
    */
   constructor(config) {
-    this.description = config.description;
     this.targeting = Array.isArray(config.targeting)
       ? Targeting.compose(config.targeting)
       : config.targeting;
+
     this.run = config.run;
     this.condition = config.condition;
+    this.description = config.description;
   }
 
   /**
@@ -647,7 +648,10 @@ export class CardEffect {
    * @returns {boolean}
    */
   canRun(game, card) {
-    return this.condition === undefined || this.condition(game, card);
+    return (
+      this.condition === undefined ||
+      this.condition(game, card, this.getTargets(game, card))
+    );
   }
 
   /**
