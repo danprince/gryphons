@@ -157,7 +157,7 @@ export class Board {
    * @param {number} width
    * @param {number} height
    */
-  constructor(game, width = 7, height = 6) {
+  constructor(game, width = 7, height = 7) {
     this.game = game;
     this.width = width;
     this.height = height;
