@@ -45,6 +45,11 @@ export const Colors = {
   jet: "#383535",
 };
 
+export const Icons = {
+  gold: "\u0080",
+  morale: "\u0081",
+};
+
 /**
  * Create a rectangle in pixel coordinates, given grid coordinates.
  * @param {number} x
