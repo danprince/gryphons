@@ -1,8 +1,8 @@
 import { expect, test } from "bun:test";
-import { Gryphon } from "../cards.js";
-import { Card } from "../game.js";
+import { Gryphon } from "../game/cards.js";
+import { Card } from "../game/game.js";
 import { setup } from "./testing.js";
-import { Knockback } from "../actions.js";
+import { Knockback } from "../game/actions.js";
 
 test("knockback moves cards into adjacent tiles", () => {
   let { map, spawn, act } = setup(`ga.`);

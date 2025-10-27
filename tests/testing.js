@@ -1,6 +1,6 @@
-import { Action, PlayCard } from "../actions.js";
-import { Game, Tile, Board, Card } from "../game.js";
-import { required } from "../utils.js";
+import { Action, PlayCard } from "../game/actions.js";
+import { Game, Tile, Board, Card } from "../game/game.js";
+import { required } from "../game/utils.js";
 
 /**
  * @template {string} S

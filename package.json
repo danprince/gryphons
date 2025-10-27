@@ -1,6 +1,5 @@
 {
   "name": "gryphons-roost",
-  "module": "index.js",
   "type": "module",
   "private": true,
   "devDependencies": {

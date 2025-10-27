@@ -32,5 +32,5 @@ jobs:
       - run: curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
       - run: unzip butler.zip
       - run: chmod +x butler
-      - run: zip build.zip *.js *.png *.html
+      - run: cd game && zip -r ../build.zip * -x *.aseprite
       - run: ./butler push build.zip $ITCH_USER/$ITCH_GAME:$ITCH_CHANNEL --userversion $RELEASE_TAG
