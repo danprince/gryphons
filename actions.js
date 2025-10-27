@@ -312,10 +312,18 @@ export class MoveToGravePile extends Action {
   }
 
   perform() {
+    let { tile } = this.card;
+
     this.game.trigger(CardTrigger.Defeat, this.card);
     this.game.deck.remove(this.card);
     this.game.board.removeCard(this.card);
     this.game.board.gravePile.addToTop(this.card);
+
+    if (this.card.type.remains) {
+      let remains = new Card(this.card.type.remains);
+      tile.add(remains);
+    }
+
     this.animate();
     return Action.done;
   }

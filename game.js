@@ -698,6 +698,7 @@ export class CardType {
    * @param {string} config.name
    * @param {string} [config.description]
    * @param {number} config.counter
+   * @param {CardType} [config.remains]
    * @param {CardEffectList} [config.effects]
    * @param {CardEffect} [config.onPlay]
    * @param {CardEffect} [config.onTurn]
@@ -711,6 +712,7 @@ export class CardType {
     this.description = config.description;
     this.counter = config.counter;
 
+    this.remains = config.remains;
     this.effects = config.effects ?? new CardEffectList();
 
     if (config.onPlay) {
