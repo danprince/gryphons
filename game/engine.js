@@ -204,6 +204,20 @@ export function drawSprite(sprite, x, y) {
 }
 
 /**
+ * @param {Sprite} sprite
+ * @param {number} x
+ * @param {number} y
+ */
+export function drawAnchoredSprite(sprite, x, y, anchorX = 0.5, anchorY = 0.5) {
+  let { x: sx, y: sy, width: sw, height: sh } = sprite;
+
+  let dx = Math.round(x - anchorX * sw);
+  let dy = Math.round(y - anchorY * sh);
+
+  ctx.drawImage(spritesImage, sx, sy, sw, sh, dx, dy, sw, sh);
+}
+
+/**
  * Draws a 9-slice sprite.
  * @param {NineSliceSprite} sprite
  * @param {number} x
