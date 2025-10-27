@@ -481,7 +481,7 @@ export class Knockback extends Action {
     let dy = Math.sign(this.tile.y - this.card.tile.y);
 
     // Queue up an action that moves the card into this tile.
-    this.game.board.addActionsBottom(new MoveCard(this.card, this.tile));
+    this.game.board.addActionsTop(new MoveCard(this.card, this.tile));
 
     // If the target tile is empty, then check whether the card will crash into
     // the card behind the empty tile.
@@ -492,7 +492,7 @@ export class Knockback extends Action {
       );
 
       if (nextTile?.card) {
-        this.game.board.addActionsBottom(
+        this.game.board.addActionsTop(
           new Damage({ card: nextTile.card, amount: 1, vfx: VFX.bump }),
         );
       }
