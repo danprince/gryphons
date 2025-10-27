@@ -122,3 +122,5 @@ export const vfx_claw = { y: 288, url: $url, height: 24, width: 96, x: 0, };
 export const vfx_heal = { y: 312, url: $url, height: 24, width: 96, x: 0, };
 export const vfx_magic = { y: 336, url: $url, height: 24, width: 96, x: 0, };
 export const vfx_slash = { y: 264, url: $url, height: 24, width: 96, x: 0, };
+export const morale_flag = { height: 24, url: $url, width: 24, x: 216, y: 72, };
+export const morale_flag_pole = { height: 24, url: $url, width: 24, x: 192, y: 72, };

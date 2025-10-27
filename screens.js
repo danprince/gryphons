@@ -8,8 +8,23 @@ import {
   Timer,
   pixelToGrid,
 } from "./engine.js";
-import { UI, GameInfo, Screen, alignToRow, drawFrame, Drag } from "./ui.js";
-import { Rectangle, assert, easeInOut, lerp, required } from "./utils.js";
+import {
+  UI,
+  GameInfo,
+  Screen,
+  alignToRow,
+  drawFrame,
+  Drag,
+  Icons,
+} from "./ui.js";
+import {
+  Rectangle,
+  assert,
+  clamp,
+  easeInOut,
+  lerp,
+  required,
+} from "./utils.js";
 import * as Sprites from "./sprites.js";
 import {
   CardStackButton,
@@ -19,7 +34,7 @@ import {
   TextButton,
   UIElement,
 } from "./elements.js";
-import { Board, Card, Game } from "./game.js";
+import { Card, Game } from "./game.js";
 import { Chest, ChestOpen, Monster } from "./cards.js";
 import {
   generateBoard,
@@ -330,7 +345,9 @@ export class BoardScreen extends GameScreen {
     get description() {
       return `Level ${
         Game.current.level + 1
-      }: Remove all the gryphons from this roost before running out of cards!`;
+      }: Remove all the gryphons from this roost before ${
+        Icons.morale
+      } morale runs out!`;
     },
     panelSprite: Sprites.panel,
     bannerSprite: Sprites.banner_neutral,
@@ -502,11 +519,24 @@ export class BoardScreen extends GameScreen {
 
     this.tablePanel.render();
     this.renderPiles();
+    this.renderMorale();
     this.renderHand();
     this.renderHandCards();
     this.renderPileCards();
 
     this.endTurnButton.render();
+  }
+
+  renderMorale() {
+    let morale = clamp(0, 10, this.game.morale);
+    drawSprite(Sprites.stack_empty, UI.MORALE.x, UI.MORALE.y);
+    drawSprite(Sprites.morale_flag_pole, UI.MORALE.x, UI.MORALE.y - 5);
+    drawSprite(Sprites.morale_flag, UI.MORALE.x, UI.MORALE.y - 5 - morale);
+    TextStyle.save();
+    TextStyle.align = "center";
+    TextStyle.baseline = "middle";
+    writeLine(`${this.game.morale}`, UI.MORALE.center.x, UI.MORALE.y1);
+    TextStyle.restore();
   }
 
   renderPiles() {

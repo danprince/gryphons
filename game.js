@@ -29,6 +29,11 @@ export class Game {
    */
   level = 0;
 
+  /**
+   * The current morale level.
+   */
+  morale = 0;
+
   gold = 0;
   feathers = 0;
   deck = new Pile();
@@ -44,7 +49,8 @@ export class Game {
   }
 
   startRound() {
-    this.level += 1;
+    // Reset morale
+    this.morale = 10;
 
     // Reset the piles for a new round.
     this.board.drawPile.reset();
@@ -65,7 +71,16 @@ export class Game {
     this.board.addActionsBottom(new DrawCardsUntilHandIsFull());
   }
 
+  /**
+   * @param {number} amount
+   */
+  setMorale(amount) {
+    this.morale = Math.max(0, amount);
+  }
+
   endTurn() {
+    this.setMorale(this.morale - 1);
+
     for (let card of this.board.hand) {
       if (card) {
         this.board.addActionsBottom(new DiscardCard(card));
