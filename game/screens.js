@@ -412,23 +412,14 @@ export class BoardScreen extends GameScreen {
     this.updateDraggingCard();
 
     let hasMonsters = this.game.board.tiles.some(
-      (tile) =>
-        tile.card?.type.category === Monster &&
-        // TODO: This is probably a sign that chests shouldn't be
-        // implemented as monsters, just need some other system for
-        // saying they are attackable then.
-        (tile.card.type !== Chest || tile.card.type !== ChestOpen),
+      (tile) => tile.card?.type.category === Monster,
     );
 
     if (!hasMonsters) {
       return UI.navigate(new VictoryScreen(this.game));
     }
 
-    if (
-      this.game.board.drawPile.isEmpty() &&
-      this.game.board.discardPile.isEmpty() &&
-      this.game.board.isHandEmpty()
-    ) {
+    if (this.game.morale === 0) {
       return UI.navigate(new DefeatScreen(this.game));
     }
   }
