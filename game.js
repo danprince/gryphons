@@ -718,7 +718,7 @@ export class CardType {
    * @param {Sprite} config.sprite
    * @param {string} config.name
    * @param {string} [config.description]
-   * @param {number} config.counter
+   * @param {number} [config.counter]
    * @param {Tag[]} [config.tags]
    * @param {CardType} [config.remains]
    * @param {CardEffectList} [config.effects]
@@ -732,8 +732,7 @@ export class CardType {
     this.sprite = config.sprite;
     this.name = config.name;
     this.description = config.description;
-    this.counter = config.counter;
-
+    this.counter = config.counter ?? 0;
     this.tags = config.tags ?? [];
     this.remains = config.remains;
     this.effects = config.effects ?? new CardEffectList();
