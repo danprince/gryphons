@@ -27,6 +27,7 @@
  */
 
 export const $url = "./sprites.png";
+export const anim_card_frame_selected = { height: 24, url: $url, width: 96, x: 288, y: 48, };
 export const banner_monster = { height: 24, url: $url, width: 96, x: 96, y: 288, };
 export const banner_neutral = { height: 24, url: $url, width: 96, x: 96, y: 264, };
 export const banner_victory = { height: 24, url: $url, width: 96, x: 96, y: 312, };
@@ -115,8 +116,16 @@ export const icon_gold = { height: 8, url: $url, width: 8, x: 80, y: 0, };
 export const icon_heal = { height: 8, url: $url, width: 8, x: 64, y: 8, };
 export const icon_left = { height: 8, url: $url, width: 8, x: 64, y: 0, };
 export const icon_play = { height: 8, url: $url, width: 8, x: 88, y: 8, };
+export const icon_question = { height: 8, url: $url, width: 8, x: 112, y: 16, };
 export const icon_right = { height: 8, url: $url, width: 8, x: 72, y: 0, };
 export const icon_shuffle = { height: 8, url: $url, width: 8, x: 112, y: 8, };
+export const indicator_arrows_damage = { height: 24, url: $url, width: 24, x: 336, y: 0, };
+export const indicator_arrows_heal = { height: 24, url: $url, width: 24, x: 360, y: 0, };
+export const indicator_arrows_move = { height: 24, url: $url, width: 24, x: 408, y: 0, };
+export const indicator_arrows_special = { height: 24, url: $url, width: 24, x: 384, y: 0, };
+export const intent_path_damage = { height: 3, url: $url, width: 3, x: 91, y: 16, };
+export const intent_path_heal = { height: 3, url: $url, width: 3, x: 94, y: 16, };
+export const intent_path_special = { height: 3, url: $url, width: 3, x: 97, y: 16, };
 export const logo = { height: 48, url: $url, width: 120, x: 192, y: 264, };
 export const morale_flag = { height: 24, url: $url, width: 24, x: 216, y: 72, };
 export const morale_flag_pole = { height: 24, url: $url, width: 24, x: 192, y: 72, };
