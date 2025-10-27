@@ -265,13 +265,13 @@ export class ShuffleDiscardIntoDraw extends Action {
 export class Damage extends Action {
   /**
    * @param {object} config
-   * @param {number} config.amount
+   * @param {number} [config.amount]
    * @param {Card} config.card
    * @param {VFX} [config.vfx]
    */
   constructor(config) {
     super();
-    this.amount = config.amount;
+    this.amount = config.amount ?? 1;
     this.card = config.card;
     this.vfx = config.vfx;
   }
