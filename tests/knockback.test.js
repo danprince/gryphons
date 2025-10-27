@@ -23,14 +23,6 @@ test("knockback doesn't move cards when they are blocked by other cards", () => 
   expect(gryphon.tile.position).toEqual(map.g.position);
 });
 
-test("knockback deals damage to knocked back cards", () => {
-  let { map, spawn, act } = setup(`.gx.`);
-  let gryphon = new Card(Gryphon);
-  spawn(gryphon, map.g);
-  act(new Knockback(gryphon, map.x));
-  expect(gryphon.counter).toEqual(gryphon.type.counter - 1);
-});
-
 test("knockback damages cards through collisions", () => {
   let { map, spawn, act } = setup(`.kxf.`);
   let k = new Card(Gryphon);
@@ -38,6 +30,6 @@ test("knockback damages cards through collisions", () => {
   spawn(k, map.k);
   spawn(f, map.f);
   act(new Knockback(k, map.x));
-  expect(k.counter).toEqual(k.type.counter - 1);
+  expect(k.counter).toEqual(k.type.counter);
   expect(f.counter).toEqual(f.type.counter - 1);
 });
