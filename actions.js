@@ -160,6 +160,7 @@ export class DiscardCard extends Action {
   perform() {
     let { board } = this.game;
 
+    board.removeCard(this.card);
     board.removeCardFromHand(this.card);
     board.discardPile.addToTop(this.card);
 
