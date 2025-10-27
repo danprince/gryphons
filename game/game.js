@@ -73,7 +73,7 @@ export class Game {
     }
 
     // Draw the initial round of cards.
-    this.board.addActionsBottom(new DrawCardsUntilHandIsFull());
+    this.startTurn();
   }
 
   /**
@@ -81,6 +81,10 @@ export class Game {
    */
   setMorale(amount) {
     this.morale = Math.max(0, amount);
+  }
+
+  startTurn() {
+    this.board.addActionsBottom(new DrawCardsUntilHandIsFull());
   }
 
   endTurn() {
@@ -99,7 +103,7 @@ export class Game {
     }
 
     this.board.cardsPlayedThisTurn = [];
-    this.board.addActionsBottom(new DrawCardsUntilHandIsFull());
+    this.startTurn();
   }
 
   /**
