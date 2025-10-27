@@ -23,7 +23,7 @@ jobs:
       ITCH_GAME: gryphons-roost
       ITCH_CHANNEL: web
       BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
-      RELEASE_TAG: ${{ github.event.release.tag_name }}
+      RELEASE_TAG: ${{ github.ref_name }}
 
     if: startsWith(github.ref, 'refs/tags/v')
 
