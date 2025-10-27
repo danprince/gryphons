@@ -1,6 +1,5 @@
 import {
   Abbess,
-  Alchemist,
   Bard,
   Bedouin,
   Bones,
@@ -38,6 +37,7 @@ import {
   Rocks,
   SkeletalGryphon,
   Spearman,
+  Surgeon,
   Townsfolk,
   Wizard,
   Wytch,
@@ -78,7 +78,7 @@ const HUMANS = [
   Abbess,
   Lord,
   Bard,
-  Alchemist,
+  Surgeon,
   Wytch,
   Cultist,
   Gravedigger,

@@ -12,6 +12,7 @@ import {
   ReturnCardToHand,
   CreateCardInHand,
   Delay,
+  ReturnCardToDrawPile,
 } from "./actions.js";
 import {
   Card,
@@ -717,20 +718,21 @@ export const Bard = new CardType({
   }),
 });
 
-export const Alchemist = new CardType({
+export const Surgeon = new CardType({
   category: Human,
-  sprite: Sprites.card_alchemist,
-  name: "Alchemist",
+  sprite: Sprites.card_surgeon,
+  name: "Surgeon",
   counter: 1,
   remains: Bones,
   onPlay: new CardEffect({
-    description: `Gain +1 ${Icons.gold} gold for set of adjacent bones.`,
-    targeting: [Targeting.adjacent, Targeting.tag(Tags.Bones)],
+    description: `Deal 1 damage to adjacent allies then return them to your draw pile`,
+    targeting: [Targeting.adjacent, Targeting.allies],
     run(game, card, targets) {
-      game.gold += targets.length;
-
       for (let target of targets) {
-        game.board.addActionsBottom(new DestroyCard(target));
+        game.board.addActionsBottom(
+          new Damage({ card: target, vfx: VFX.slash }),
+          new ReturnCardToDrawPile(target),
+        );
       }
     },
   }),
