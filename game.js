@@ -678,11 +678,18 @@ export class CardEffectList {
 
   /**
    * @param {CardTrigger} trigger
-   * @param {CardEffect} effect
+   * @param {CardEffect | CardEffect[]} effects
    * @returns {this}
    */
-  add(trigger, effect) {
-    this.items.push([trigger, effect]);
+  add(trigger, effects) {
+    if (Array.isArray(effects)) {
+      for (let effect of effects) {
+        this.items.push([trigger, effect]);
+      }
+    } else {
+      this.items.push([trigger, effects]);
+    }
+
     return this;
   }
 }
@@ -715,10 +722,10 @@ export class CardType {
    * @param {Tag[]} [config.tags]
    * @param {CardType} [config.remains]
    * @param {CardEffectList} [config.effects]
-   * @param {CardEffect} [config.onPlay]
-   * @param {CardEffect} [config.onTurn]
-   * @param {CardEffect} [config.onDefeat]
-   * @param {CardEffect} [config.onDamage]
+   * @param {CardEffect | CardEffect[]} [config.onPlay]
+   * @param {CardEffect | CardEffect[]} [config.onTurn]
+   * @param {CardEffect | CardEffect[]} [config.onDefeat]
+   * @param {CardEffect | CardEffect[]} [config.onDamage]
    */
   constructor(config) {
     this.category = config.category;
@@ -735,16 +742,16 @@ export class CardType {
       this.effects.add(CardTrigger.Play, config.onPlay);
     }
 
-    if (config.onDefeat) {
-      this.effects.add(CardTrigger.Defeat, config.onDefeat);
+    if (config.onTurn) {
+      this.effects.add(CardTrigger.Turn, config.onTurn);
     }
 
     if (config.onDamage) {
       this.effects.add(CardTrigger.Damage, config.onDamage);
     }
 
-    if (config.onTurn) {
-      this.effects.add(CardTrigger.Turn, config.onTurn);
+    if (config.onDefeat) {
+      this.effects.add(CardTrigger.Defeat, config.onDefeat);
     }
   }
 }
