@@ -363,11 +363,84 @@ export class DestroyCard extends Action {
   }
 
   perform() {
+    if (this.card.isInPlay()) {
+      VFX.play(VFX.bump, this.card.bounds.x, this.card.bounds.y);
+    }
+
     // We don't actually know where the card is so just remove it from
     // everywhere.
     this.game.deck.remove(this.card);
     this.game.board.removeCard(this.card);
     this.game.board.removeCardFromHand(this.card);
+
+    return Action.done;
+  }
+}
+
+export class Pull extends Action {
+  /**
+   * @param {Card} card
+   * @param {Card} target
+   */
+  constructor(card, target) {
+    super();
+    this.card = card;
+    this.target = target;
+  }
+
+  perform() {
+    // Bail if either card was removed from play after the action was created.
+    if (!this.card.isInPlay() || !this.target.isInPlay()) {
+      return Action.done;
+    }
+
+    // Normalize the direction of the push so that we never skip tiles.
+    let dx = Math.sign(this.card.tile.x - this.target.tile.x);
+    let dy = Math.sign(this.card.tile.y - this.target.tile.y);
+
+    let x = this.target.tile.x + dx;
+    let y = this.target.tile.y + dy;
+
+    let tile = this.game.board.getTileAt(x, y);
+
+    if (tile) {
+      this.game.board.addActionsTop(new MoveCard(this.target, tile));
+    }
+
+    return Action.done;
+  }
+}
+
+export class Push extends Action {
+  /**
+   * @param {Card} card
+   * @param {Card} target
+   */
+  constructor(card, target) {
+    super();
+    this.card = card;
+    this.target = target;
+  }
+
+  perform() {
+    // Bail if either card was removed from play after the action was created.
+    if (!this.card.isInPlay() || !this.target.isInPlay()) {
+      return Action.done;
+    }
+
+    // Normalize the direction of the push so that we never skip tiles.
+    let dx = Math.sign(this.target.tile.x - this.card.tile.x);
+    let dy = Math.sign(this.target.tile.y - this.card.tile.y);
+
+    let x = this.target.tile.x + dx;
+    let y = this.target.tile.y + dy;
+
+    let tile = this.game.board.getTileAt(x, y);
+
+    if (tile) {
+      this.game.board.addActionsTop(new Knockback(this.target, tile));
+    }
+
     return Action.done;
   }
 }
@@ -393,12 +466,8 @@ export class Knockback extends Action {
     let dx = Math.sign(this.tile.x - this.card.tile.x);
     let dy = Math.sign(this.tile.y - this.card.tile.y);
 
-    this.game.board.addActionsBottom(
-      // Queue up an action that moves the card into this tile.
-      new MoveCard(this.card, this.tile),
-      // Then an action that damages the card.
-      new Damage({ card: this.card, amount: 1, vfx: VFX.bump }),
-    );
+    // Queue up an action that moves the card into this tile.
+    this.game.board.addActionsBottom(new MoveCard(this.card, this.tile));
 
     // If the target tile is empty, then check whether the card will crash into
     // the card behind the empty tile.
@@ -670,5 +739,48 @@ export class Delay extends AsyncAction {
     return new Promise((resolve) => {
       setTimeout(resolve, this.duration);
     });
+  }
+}
+
+export class Demoralize extends Action {
+  constructor(amount = 1) {
+    super();
+    this.amount = amount;
+  }
+
+  run() {
+    this.game.morale -= this.amount;
+  }
+}
+
+export class Resurrect extends Action {
+  /**
+   * @param {Card} card
+   * @param {Tile} tile
+   */
+  constructor(card, tile) {
+    super();
+    this.card = card;
+    this.tile = tile;
+  }
+
+  run() {
+    // Card is no longer in the grave pile.
+    if (!this.game.board.gravePile.includes(this.card)) {
+      return Action.done;
+    }
+
+    //
+    if (!this.tile.isEmpty()) {
+      return Action.done;
+    }
+
+    this.card.interactive = true;
+    this.card.visible = true;
+    this.tile.add(this.card);
+
+    VFX.play(VFX.heal, this.card.bounds.center.x, this.card.bounds.center.y);
+
+    // TODO: Animate
   }
 }

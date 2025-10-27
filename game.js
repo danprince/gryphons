@@ -2,6 +2,9 @@ import { ctx, drawSprite, TextStyle, Timer, writeLine } from "./engine.js";
 import { Colors, UI } from "./ui.js";
 import {
   assert,
+  clamp,
+  findAllMaxBy,
+  findAllMinBy,
   isNonNullable,
   last,
   Neighbours,
@@ -9,8 +12,10 @@ import {
   removeFromArray,
   required,
   shuffle,
+  unique,
 } from "./utils.js";
 import { DrawCardsUntilHandIsFull, DiscardCard, Action } from "./actions.js";
+import * as Sprites from "./sprites.js";
 
 /**
  * @import { Sprite } from "./sprites.js";
@@ -190,6 +195,19 @@ export class Board {
         this.removeCard(tile.card);
       }
     }
+  }
+
+  /**
+   * @param {Tile} tile
+   * @returns {boolean}
+   */
+  isEdge(tile) {
+    return (
+      tile.x === 0 ||
+      tile.y === 0 ||
+      tile.x === this.width - 1 ||
+      tile.y === this.height - 1
+    );
   }
 
   /**
@@ -561,11 +579,10 @@ export const Targeting = {
   },
 
   /**
-   * @param {(card: Card) => boolean} predicate
-   * @returns {TargetingFilter}
+   * @type {TargetingFilter}
    */
-  test(predicate) {
-    return (game, card, targets) => targets.filter(predicate);
+  injured(game, card, targets) {
+    return targets.filter((target) => target.counter < target.type.counter);
   },
 
   /**
@@ -576,10 +593,57 @@ export const Targeting = {
   },
 
   /**
+   * @type {TargetingFilter}
+   */
+  nearest(game, card, targets) {
+    return findAllMinBy(targets, (target) => card.distance(target));
+  },
+
+  /**
+   * @type {TargetingSource}
+   */
+  grapple(game, card) {
+    let { x, y } = card.tile;
+
+    let adjacency = [
+      { x: -2, y: -2 },
+      { x: -0, y: -2 },
+      { x: +2, y: -2 },
+      { x: -2, y: -0 },
+      { x: -0, y: -0 },
+      { x: +2, y: -0 },
+      { x: -2, y: +2 },
+      { x: -0, y: +2 },
+      { x: +2, y: +2 },
+    ];
+
+    return adjacency
+      .map((step) => game.board.getTileAt(x + step.x, y + step.y)?.card)
+      .filter(isNonNullable);
+  },
+
+  /**
    * @type {TargetingSource}
    */
   all(game, card) {
     return game.board.getCardsInPlay();
+  },
+
+  /**
+   * @type {TargetingFilter}
+   */
+  connected(game, card, targets) {
+    return unique(
+      targets.flatMap((target) => {
+        return [
+          target,
+          ...game.board.search(
+            target,
+            (card) => card.category === target.category,
+          ),
+        ];
+      }),
+    );
   },
 
   // TODO:
@@ -604,6 +668,16 @@ export const Targeting = {
   tag(tag) {
     return (game, card, targets) => {
       return targets.filter((target) => target.type.tags.includes(tag));
+    };
+  },
+
+  /**
+   * @param {(card: Card) =>boolean} func
+   * @returns {TargetingFilter}
+   */
+  custom(func) {
+    return (game, card, targets) => {
+      return targets.filter(func);
     };
   },
 };
@@ -696,18 +770,52 @@ export class CardEffectList {
 
 export class CardCategory {
   /**
-   *
    * @param {object} config
    * @param {string} config.name
    * @param {Sprite} config.counterFrameSprite
+   * @param {Sprite} config.cardBackSprite
    * @param {CardCategory[]} [config.enemies]
    * @param {CardCategory[]} [config.allies]
    */
   constructor(config) {
     this.name = config.name;
+    this.cardBackSprite = config.cardBackSprite;
     this.counterFrameSprite = config.counterFrameSprite;
     this.enemies = config.enemies ?? [];
     this.allies = config.allies ?? [];
+  }
+}
+
+export class CardRarity {
+  static Common = new CardRarity({ name: "Common" });
+
+  static Uncommon = new CardRarity({
+    name: "Common",
+    frameSprite: Sprites.card_frame_uncommon,
+  });
+
+  static Rare = new CardRarity({
+    name: "Common",
+    frameSprite: Sprites.card_frame_rare,
+  });
+
+  /**
+   * @param {object} config
+   * @param {string} config.name
+   * @param {Sprite} [config.frameSprite]
+   */
+  constructor(config) {
+    this.name = config.name;
+    this.frameSprite = config.frameSprite;
+  }
+}
+
+export class Tag {
+  /**
+   * @param {string} name
+   */
+  constructor(name) {
+    this.name = name;
   }
 }
 
@@ -721,6 +829,7 @@ export class CardType {
    * @param {number} [config.counter]
    * @param {Tag[]} [config.tags]
    * @param {CardType} [config.remains]
+   * @param {CardRarity} [config.rarity]
    * @param {CardEffectList} [config.effects]
    * @param {CardEffect | CardEffect[]} [config.onPlay]
    * @param {CardEffect | CardEffect[]} [config.onTurn]
@@ -734,6 +843,7 @@ export class CardType {
     this.description = config.description;
     this.counter = config.counter ?? 0;
     this.tags = config.tags ?? [];
+    this.rarity = config.rarity ?? CardRarity.Common;
     this.remains = config.remains;
     this.effects = config.effects ?? new CardEffectList();
 
@@ -880,6 +990,19 @@ export class Card {
   }
 
   /**
+   * Euclidean distance to another card (in board units).
+   * @param {Card} card
+   * @returns {number}
+   */
+  distance(card) {
+    if (this.isInPlay() && card.isInPlay()) {
+      return Math.hypot(card.tile.x - this.tile.x, card.tile.y - this.tile.y);
+    } else {
+      return Infinity;
+    }
+  }
+
+  /**
    * Create a card specific timer, replacing any other timers that were active
    * on this card. Useful to make sure that multiple animations don't run at
    * once.
@@ -904,7 +1027,13 @@ export class Card {
     }
 
     ctx.globalAlpha = this.opacity;
+
+    drawSprite(this.type.category.cardBackSprite, x, y);
     drawSprite(this.type.sprite, x, y);
+
+    if (this.type.rarity.frameSprite) {
+      drawSprite(this.type.rarity.frameSprite, x, y);
+    }
 
     if (this.counter > 0) {
       let sprite = this.type.category.counterFrameSprite;

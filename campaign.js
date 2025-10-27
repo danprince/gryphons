@@ -1,26 +1,46 @@
 import {
-  Apostle,
+  Abbess,
+  Alchemist,
+  Bard,
+  Bedouin,
   Bones,
-  Cleric,
+  Brawler,
+  Butcher,
+  Caller,
+  Captain,
+  Cardinal,
+  Champion,
   Commander,
+  Cultist,
+  Egg,
+  Friar,
+  Ghost,
   Gladiator,
-  GraveRobber,
+  Gravedigger,
   Gryphon,
+  Herbalist,
+  Hermit,
   Hero,
+  HornedGryphon,
   Hunter,
   Knight,
   Lich,
+  Lord,
+  Marksman,
   MeanGryphon,
-  Miner,
+  Messenger,
+  Monk,
   Peasant,
+  Prophet,
   ProudGryphon,
   Pyromancer,
   RestlessGryphon,
   Rocks,
-  Scout,
   SkeletalGryphon,
-  StonyGryphon,
+  Spearman,
+  Townsfolk,
   Wizard,
+  Wytch,
   YoungGryphon,
 } from "./cards.js";
 import { Board, Card, CardType, Game } from "./game.js";
@@ -30,37 +50,81 @@ import { assert, randomItem, required, shuffle } from "./utils.js";
  * @import { NonEmptyArray } from "./utils.js";
  */
 
-export const STARTING_DECK = [
+/**
+ * @type {NonEmptyArray<CardType>}
+ */
+const HUMANS = [
   Peasant,
-  Peasant,
-  Peasant,
-  Peasant,
-  Peasant,
+  Captain,
+  Messenger,
+  Herbalist,
+  Brawler,
   Hunter,
-  Hunter,
-  Cleric,
+  Friar,
+  Monk,
+  Prophet,
+  Butcher,
+  Spearman,
+  Marksman,
+  Knight,
+  Gladiator,
+  Bedouin,
+  Pyromancer,
+  Hermit,
   Hero,
+  Wizard,
+  Commander,
+  Champion,
+  Abbess,
+  Lord,
+  Bard,
+  Alchemist,
+  Wytch,
+  Cultist,
+  Gravedigger,
+  Cardinal,
+  Lich,
+  Caller,
+  Ghost,
+];
+
+/**
+ * @type {CardType[]}
+ */
+export const STARTING_DECK = [Peasant, Peasant, Cultist, Cultist, Cultist];
+
+for (let i = 0; i < 20; i++) {
+  STARTING_DECK.push(randomItem(HUMANS));
+}
+
+/**
+ * @type {NonEmptyArray<CardType>}
+ */
+const EASY_MONSTERS = [
+  Gryphon,
+  YoungGryphon,
+  RestlessGryphon,
+  MeanGryphon,
+  ProudGryphon,
+  Townsfolk,
+  HornedGryphon,
+  SkeletalGryphon,
 ];
 
 /**
  * @type {NonEmptyArray<CardType>}
  */
-const EASY_MONSTERS = [Gryphon, YoungGryphon, RestlessGryphon];
+const TOUGH_MONSTERS = [MeanGryphon, ProudGryphon, Townsfolk];
 
 /**
  * @type {NonEmptyArray<CardType>}
  */
-const TOUGH_MONSTERS = [MeanGryphon, ProudGryphon];
+const HARD_MONSTERS = [MeanGryphon];
 
 /**
  * @type {NonEmptyArray<CardType>}
  */
-const HARD_MONSTERS = [SkeletalGryphon, StonyGryphon];
-
-/**
- * @type {NonEmptyArray<CardType>}
- */
-const OBSTACLES = [Rocks, Bones];
+const OBSTACLES = [Rocks, Bones, Egg];
 
 /**
  * @template Item
@@ -86,7 +150,7 @@ function pick(count, items) {
  * @param {Array<CardType | CardType[]>} cardTypes
  */
 function spawn(board, cardTypes) {
-  let tileQueue = [...board.tiles];
+  let tileQueue = [...board.tiles].filter((tile) => !board.isEdge(tile));
   shuffle(tileQueue);
 
   for (let cardType of cardTypes.flat()) {
@@ -134,19 +198,12 @@ export function generateBoard(game) {
 /**
  * @type {NonEmptyArray<CardType>}
  */
-const COMMON_REWARDS = [Hunter, Cleric, Miner, Gladiator];
+const COMMON_REWARDS = [Hunter, Gladiator];
 
 /**
  * @type {NonEmptyArray<CardType>}
  */
-const UNCOMMON_REWARDS = [
-  Lich,
-  Hero,
-  Knight,
-  GraveRobber,
-  Apostle,
-  Scout,
-];
+const UNCOMMON_REWARDS = [Lich, Hero, Knight];
 
 /**
  * @type {NonEmptyArray<CardType>}

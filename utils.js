@@ -417,40 +417,45 @@ export function easeOutBack(t) {
  * @template T
  * @param {T[]} array
  * @param {(item: T) => number} getScore
- * @returns {T | undefined}
+ * @returns {T[]}
  */
-export function findMaxBy(array, getScore) {
-  let maxScore = -Infinity;
-  let maxItem = array[0];
+export function findAllMinBy(array, getScore) {
+  let minScore = Infinity;
 
   for (let item of array) {
     let score = getScore(item);
-    if (score >= maxScore) {
-      maxItem = item;
-      maxScore = score;
+    if (score < minScore) {
+      minScore = score;
     }
   }
 
-  return maxItem;
+  return array.filter((item) => getScore(item) === minScore);
 }
 
 /**
  * @template T
  * @param {T[]} array
  * @param {(item: T) => number} getScore
- * @returns {T | undefined}
+ * @returns {T[]}
  */
-export function findMinBy(array, getScore) {
-  let minScore = Infinity;
-  let minItem = array[0];
+export function findAllMaxBy(array, getScore) {
+  let maxScore = -Infinity;
 
   for (let item of array) {
     let score = getScore(item);
-    if (score <= minScore) {
-      minItem = item;
-      minScore = score;
+    if (score > maxScore) {
+      maxScore = score;
     }
   }
 
-  return minItem;
+  return array.filter((item) => getScore(item) === maxScore);
+}
+
+/**
+ * @template T
+ * @param {T[]} array
+ * @returns {T[]}
+ */
+export function unique(array) {
+  return Array.from(new Set(array));
 }
