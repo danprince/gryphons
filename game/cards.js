@@ -4,7 +4,7 @@ import {
   Damage,
   DestroyCard,
   DrawCard,
-  Demoralize,
+  ChangeMoraleAction,
   DiscardCard,
   Push,
   Action,
@@ -185,17 +185,18 @@ const PullAllies = new CardEffect({
 
 export const Inspire = new CardEffect({
   description: "Gain 1 morale",
-  run: (game) => game.board.addActionsBottom(new Demoralize(-1)),
+  run: (game) => game.board.addActionsBottom(new ChangeMoraleAction(1)),
 });
 
 export const Despair = new CardEffect({
   description: "Lose 1 morale",
-  run: (game) => game.board.addActionsBottom(new Demoralize()),
+  run: (game) => game.board.addActionsBottom(new ChangeMoraleAction(-1)),
 });
 
 export const Hopeless = new CardEffect({
   description: `Lose ALL morale ${Icons.morale}`,
-  run: (game) => game.board.addActionsBottom(new Demoralize(game.morale)),
+  run: (game) =>
+    game.board.addActionsBottom(new ChangeMoraleAction(-game.morale)),
 });
 
 export const Bones = new CardType({
@@ -702,7 +703,7 @@ export const Bard = new CardType({
     targeting: [Targeting.adjacent, Targeting.enemies],
     run(game, card, targets) {
       if (targets.length > 0) {
-        game.board.addActionsBottom(new Demoralize(-targets.length));
+        game.board.addActionsBottom(new ChangeMoraleAction(targets.length));
       }
     },
   }),
@@ -869,11 +870,9 @@ export const Cardinal = new CardType({
     targeting: [Targeting.adjacent, Targeting.tag(Tags.Bones)],
     run(game, card, targets) {
       for (let target of targets) {
-        game.board.addActionsBottom(
-          new DestroyCard(target),
-          new Demoralize(-1),
-        );
+        game.board.addActionsBottom(new DestroyCard(target));
       }
+      game.board.addActionsBottom(new ChangeMoraleAction(targets.length));
     },
   }),
 });
@@ -946,7 +945,7 @@ export const Ghost = new CardType({
     targeting: [Targeting.adjacent, Targeting.allies],
     run(game, card, targets) {
       if (targets.length > 0) {
-        game.board.addActionsBottom(new Demoralize(targets.length));
+        game.board.addActionsBottom(new ChangeMoraleAction(-1));
       }
     },
   }),

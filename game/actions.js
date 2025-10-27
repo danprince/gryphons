@@ -742,14 +742,18 @@ export class Delay extends AsyncAction {
   }
 }
 
-export class Demoralize extends Action {
-  constructor(amount = 1) {
+export class ChangeMoraleAction extends Action {
+  /**
+   * @param {number} amount
+   */
+  constructor(amount) {
     super();
     this.amount = amount;
   }
 
-  run() {
+  perform() {
     this.game.morale -= this.amount;
+    return Action.done;
   }
 }
 
