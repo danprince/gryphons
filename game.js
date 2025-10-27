@@ -105,7 +105,7 @@ export class Game {
     for (let [trigger, effect] of card.type.effects.items) {
       if (trigger === type && effect.canRun(this, card)) {
         let targets = effect.getTargets(this, card);
-        effect.run(this, card, targets);
+        effect.run?.(this, card, targets);
       }
     }
   }
@@ -630,7 +630,7 @@ export class CardEffect {
    * @param {string} [config.description]
    * @param {(game: Game, card: Card) => boolean} [config.condition]
    * @param {TargetingFunction | [TargetingSource, ...TargetingFilter[]]} [config.targeting]
-   * @param {(game: Game, card: Card, targets: Card[]) => void} config.run
+   * @param {(game: Game, card: Card, targets: Card[]) => void} [config.run]
    */
   constructor(config) {
     this.description = config.description;
