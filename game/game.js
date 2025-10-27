@@ -12,7 +12,12 @@ import {
   shuffle,
   unique,
 } from "./utils.js";
-import { DrawCardsUntilHandIsFull, DiscardCard, Action } from "./actions.js";
+import {
+  DrawCardsUntilHandIsFull,
+  DiscardCard,
+  Action,
+  DiscardHand,
+} from "./actions.js";
 import * as Sprites from "./sprites.js";
 
 /**
@@ -88,11 +93,7 @@ export class Game {
   endTurn() {
     this.setMorale(this.morale - 1);
 
-    for (let card of this.board.hand) {
-      if (card) {
-        this.board.addActionsBottom(new DiscardCard(card));
-      }
-    }
+    this.board.addActionsBottom(new DiscardHand());
 
     for (let tile of this.board.tiles) {
       if (tile.card) {

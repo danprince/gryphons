@@ -199,6 +199,20 @@ export class DiscardCard extends Action {
   }
 }
 
+export class DiscardHand extends Action {
+  perform() {
+    let { board } = this.game;
+
+    for (let card of board.hand) {
+      if (card) {
+        board.addActionsTop(new DiscardCard(card));
+      }
+    }
+
+    return Action.done;
+  }
+}
+
 export class PlayCard extends Action {
   /**
    * @param {Card} card
