@@ -716,7 +716,7 @@ export const Alchemist = new CardType({
   remains: Bones,
   onPlay: new CardEffect({
     description: `Gain +1 ${Icons.gold} gold for set of adjacent bones.`,
-    targeting: [Targeting.adjacent, Targeting.type(Bones)],
+    targeting: [Targeting.adjacent, Targeting.tag(Tags.Bones)],
     run(game, card, targets) {
       game.gold += targets.length;
 
@@ -849,7 +849,7 @@ export const Gravedigger = new CardType({
   remains: Bones,
   onPlay: new CardEffect({
     description: "Draw a card for each adjacent set of bones",
-    targeting: [Targeting.adjacent, Targeting.type(Bones)],
+    targeting: [Targeting.adjacent, Targeting.tag(Tags.Bones)],
     run(game, card, targets) {
       for (let target of targets) {
         game.board.addActionsBottom(new DestroyCard(target), new DrawCard());
@@ -866,7 +866,7 @@ export const Cardinal = new CardType({
   remains: Bones,
   onPlay: new CardEffect({
     description: `Gain +1 ${Icons.morale} morale for each adjacent set of bones.`,
-    targeting: [Targeting.adjacent, Targeting.type(Bones)],
+    targeting: [Targeting.adjacent, Targeting.tag(Tags.Bones)],
     run(game, card, targets) {
       for (let target of targets) {
         game.board.addActionsBottom(
@@ -893,7 +893,7 @@ export const Lich = new CardType({
   counter: 2,
   onPlay: new CardEffect({
     description: "Turn adjacent bones into thralls.",
-    targeting: [Targeting.adjacent, Targeting.type(Bones)],
+    targeting: [Targeting.adjacent, Targeting.tag(Tags.Bones)],
     run(game, card, targets) {
       for (let target of targets) {
         game.board.addActionsBottom(
@@ -912,7 +912,7 @@ export const Caller = new CardType({
   counter: 1,
   onPlay: new CardEffect({
     description: "Resurrect one card for each set of adjacent bones.",
-    targeting: [Targeting.adjacent, Targeting.type(Bones)],
+    targeting: [Targeting.adjacent, Targeting.tag(Tags.Bones)],
     run(game, card, bones) {
       let gravePileQueue = Array.from(game.board.gravePile);
 
