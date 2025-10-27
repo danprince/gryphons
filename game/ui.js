@@ -110,6 +110,16 @@ export const UI = {
     },
   },
 
+  /**
+   * Time since the first frame.
+   */
+  time: 0,
+
+  /**
+   * Time since the last frame.
+   */
+  deltaTime: 0,
+
   screenshakeTimer: 0,
 
   /**
@@ -265,6 +275,8 @@ export const UI = {
    * @param {number} dt
    */
   update(dt) {
+    this.time += dt;
+    this.deltaTime = dt;
     this.cardInfo = undefined;
     this.tempGameInfo = undefined;
     this.currentScreen?.update(dt);
