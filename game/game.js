@@ -1033,11 +1033,12 @@ export class Card {
     ctx.globalAlpha = this.opacity;
 
     drawSprite(this.type.category.cardBackSprite, x, y);
-    drawSprite(this.type.sprite, x, y);
 
     if (this.type.rarity.frameSprite) {
       drawSprite(this.type.rarity.frameSprite, x, y);
     }
+
+    drawSprite(this.type.sprite, x, y);
 
     if (this.counter > 0) {
       let sprite = this.type.category.counterFrameSprite;
