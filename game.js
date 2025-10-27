@@ -596,6 +596,16 @@ export const Targeting = {
       return targets.filter((target) => target.type === cardType);
     };
   },
+
+  /**
+   * @param {Tag} tag
+   * @returns {TargetingFilter}
+   */
+  tag(tag) {
+    return (game, card, targets) => {
+      return targets.filter((target) => target.type.tags.includes(tag));
+    };
+  },
 };
 
 export class CardTrigger {
@@ -698,6 +708,7 @@ export class CardType {
    * @param {string} config.name
    * @param {string} [config.description]
    * @param {number} config.counter
+   * @param {Tag[]} [config.tags]
    * @param {CardType} [config.remains]
    * @param {CardEffectList} [config.effects]
    * @param {CardEffect} [config.onPlay]
@@ -712,6 +723,7 @@ export class CardType {
     this.description = config.description;
     this.counter = config.counter;
 
+    this.tags = config.tags ?? [];
     this.remains = config.remains;
     this.effects = config.effects ?? new CardEffectList();
 
@@ -799,6 +811,14 @@ export class Card {
     let copy = new Card(this.type);
     copy.counter = this.counter;
     return copy;
+  }
+
+  /**
+   * @param {Tag} tag
+   * @returns {boolean}
+   */
+  hasTag(tag) {
+    return this.type.tags.includes(tag);
   }
 
   isHovered() {
