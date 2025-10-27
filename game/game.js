@@ -2,8 +2,6 @@ import { ctx, drawSprite, TextStyle, Timer, writeLine } from "./engine.js";
 import { Colors, UI } from "./ui.js";
 import {
   assert,
-  clamp,
-  findAllMaxBy,
   findAllMinBy,
   isNonNullable,
   last,
