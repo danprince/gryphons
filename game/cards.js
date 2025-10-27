@@ -396,7 +396,15 @@ export const Prophet = new CardType({
   name: "Prophet",
   counter: 2,
   remains: Bones,
-  onPlay: [], // TODO
+  onPlay: new CardEffect({
+    targeting: [Targeting.adjacent, Targeting.allies],
+    description: "Discard adjacent allies",
+    run(game, card, targets) {
+      for (let target of targets) {
+        game.board.addActionsBottom(new DiscardCard(target));
+      }
+    },
+  }),
 });
 
 export const Marksman = new CardType({
