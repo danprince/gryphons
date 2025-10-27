@@ -766,7 +766,7 @@ export class ChangeMoraleAction extends Action {
   }
 
   perform() {
-    this.game.morale -= this.amount;
+    this.game.morale += this.amount;
     return Action.done;
   }
 }
