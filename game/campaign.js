@@ -38,6 +38,7 @@ import {
   SkeletalGryphon,
   Spearman,
   Surgeon,
+  ThornyGryphon,
   Townsfolk,
   Wizard,
   Wytch,
@@ -109,6 +110,7 @@ const EASY_MONSTERS = [
   Townsfolk,
   HornedGryphon,
   SkeletalGryphon,
+  ThornyGryphon,
 ];
 
 /**

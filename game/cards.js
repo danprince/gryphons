@@ -63,7 +63,7 @@ export const Fly = new CardEffect({
 });
 
 export const ClawRandomAdjacentEnemy = new CardEffect({
-  description: "Attacks one adjacent enemy each turn",
+  description: "Attack one adjacent enemy",
   targeting: [Targeting.adjacent, Targeting.enemies],
   run(game, card, targets) {
     let target = randomItem(targets);
@@ -1079,4 +1079,12 @@ export const GhostlyGryphon = new CardType({
   name: "Ghostly Gryphon",
   counter: 3,
   onTurn: [Fly, ClawRandomAdjacentEnemy],
+});
+
+export const ThornyGryphon = new CardType({
+  category: Monster,
+  sprite: Sprites.card_thorny_gryphon,
+  name: "Thorny Gryphon",
+  counter: 3,
+  onDamage: ClawRandomAdjacentEnemy,
 });

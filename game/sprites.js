@@ -93,6 +93,7 @@ export const card_rocks = { height: 24, url: $url, width: 24, x: 48, y: 168, };
 export const card_skeletal_gryphon = { height: 24, url: $url, width: 24, x: 168, y: 144, };
 export const card_spearman = { height: 24, url: $url, width: 24, x: 288, y: 96, };
 export const card_surgeon = { height: 24, url: $url, width: 24, x: 168, y: 120, };
+export const card_thorny_gryphon = { height: 24, url: $url, width: 24, x: 240, y: 144, };
 export const card_thrall = { height: 24, url: $url, width: 24, x: 312, y: 120, };
 export const card_townsfolk = { height: 24, url: $url, width: 24, x: 0, y: 96, };
 export const card_wizard = { height: 24, url: $url, width: 24, x: 24, y: 120, };
