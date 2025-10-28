@@ -1088,3 +1088,34 @@ export const ThornyGryphon = new CardType({
   counter: 3,
   onDamage: ClawRandomAdjacentEnemy,
 });
+
+export const MatriarchGryphon = new CardType({
+  category: Monster,
+  sprite: Sprites.card_matriarch_gryphon,
+  name: "Matriarch",
+  counter: 5,
+  onTurn: new CardEffect({
+    description:
+      "If there are adjacent enemies, attack them, otherwise create a young gryphon in an adjacent empty tile.",
+    targeting: [Targeting.adjacent, Targeting.enemies],
+    run(game, card, targets) {
+      if (targets.length > 0) {
+        for (let target of targets) {
+          game.board.addActionsBottom(
+            new Damage({ card: target, vfx: VFX.claw }),
+          );
+        }
+      } else {
+        let tiles = game.board.getAdjacentTiles(card.tile);
+        let emptyTiles = tiles.filter((tile) => tile.isEmpty());
+        let emptyTile = randomItem(emptyTiles);
+
+        if (emptyTile) {
+          game.board.addActionsBottom(
+            new PlayCard(new Card(YoungGryphon), emptyTile),
+          );
+        }
+      }
+    },
+  }),
+});

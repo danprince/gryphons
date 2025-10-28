@@ -80,6 +80,7 @@ export const card_knight = { height: 24, url: $url, width: 24, x: 312, y: 96, };
 export const card_lich = { height: 24, url: $url, width: 24, x: 288, y: 120, };
 export const card_lord = { height: 24, url: $url, width: 24, x: 120, y: 120, };
 export const card_marksman = { height: 24, url: $url, width: 24, x: 240, y: 96, };
+export const card_matriarch_gryphon = { height: 24, url: $url, width: 24, x: 264, y: 144, };
 export const card_mean_gryphon = { height: 24, url: $url, width: 24, x: 48, y: 144, };
 export const card_messenger = { height: 24, url: $url, width: 24, x: 72, y: 96, };
 export const card_monk = { height: 24, url: $url, width: 24, x: 192, y: 96, };

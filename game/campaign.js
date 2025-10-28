@@ -26,6 +26,7 @@ import {
   Lich,
   Lord,
   Marksman,
+  MatriarchGryphon,
   MeanGryphon,
   Messenger,
   Monk,
@@ -111,6 +112,7 @@ const EASY_MONSTERS = [
   HornedGryphon,
   SkeletalGryphon,
   ThornyGryphon,
+  MatriarchGryphon,
 ];
 
 /**
