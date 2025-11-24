@@ -2,7 +2,12 @@
   "name": "gryphons-roost",
   "type": "module",
   "private": true,
+  "scripts": {
+    "desktop": "neu run",
+    "dev": "bunx live-server ./game"
+  },
   "devDependencies": {
+    "@neutralinojs/neu": "^11.6.0",
     "@types/bun": "^1.3.0",
     "typescript": "^5.9.3"
   }

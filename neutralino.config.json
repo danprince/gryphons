@@ -1,0 +1,34 @@
+{
+  "applicationId": "danprince.gryphons",
+  "version": "0.0.1",
+  "defaultMode": "window",
+  "documentRoot": "/game/",
+  "url": "/",
+  "enableServer": true,
+  "enableNativeAPI": true,
+  "nativeAllowList": ["app.*"],
+  "modes": {
+    "window": {
+      "title": "Gryphon's Roost",
+      "width": 912,
+      "height": 576,
+      "minWidth": 456,
+      "minHeight": 288,
+      "icon": "/game/favicon.png",
+      "fullScreen": false
+    }
+  },
+  "cli": {
+    "binaryName": "gryphons-roost",
+    "resourcesPath": "/game/",
+    "extensionsPath": "/extensions/",
+    "binaryVersion": "6.3.0",
+    "clientVersion": "6.3.0",
+    "frontendLibrary": {
+      "devCommand": "bun dev --no-browser",
+      "devUrl": "http://localhost:8080",
+      "projectPath": "/game/",
+      "patchFile": "/game/index.html"
+    }
+  }
+}
