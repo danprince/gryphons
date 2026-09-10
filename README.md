@@ -1,5 +1,5 @@
 # Gryphon's Roost
-<img height="40" src="https://static.itch.io/images/badge-color.svg" />
+<a href="https://danprince.itch.io/gryphons-roost"><img height="40" src="https://static.itch.io/images/badge-color.svg" /></a>
 
 A tactical deckbuilder about managing a team of fanatics trying to cleanse the land from an invasion of gryphons.
 
